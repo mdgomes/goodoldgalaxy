@@ -23,7 +23,32 @@ if not os.path.exists(LOGO_IMAGE_PATH):
 ICON_WINE_PATH = os.path.abspath(os.path.join(LAUNCH_DIR, "../data/images/winehq_logo_glass.png"))
 if not os.path.exists(ICON_WINE_PATH):
     ICON_WINE_PATH = os.path.abspath(os.path.join(LAUNCH_DIR, "../share/minigalaxy/images/winehq_logo_glass.png"))
-    
+
+ICON_WINDOWS_PATH = os.path.abspath(os.path.join(LAUNCH_DIR, "../data/images/windows_icon.png"))
+if not os.path.exists(ICON_WINDOWS_PATH):
+    ICON_WINDOWS_PATH = os.path.abspath(os.path.join(LAUNCH_DIR, "../share/minigalaxy/images/windows_icon.png"))
+
+ICON_LINUX_PATH = os.path.abspath(os.path.join(LAUNCH_DIR, "../data/images/linux_icon.png"))
+if not os.path.exists(ICON_LINUX_PATH):
+    ICON_LINUX_PATH = os.path.abspath(os.path.join(LAUNCH_DIR, "../share/minigalaxy/images/linux_icon.png"))
+
+ICON_MAC_PATH = os.path.abspath(os.path.join(LAUNCH_DIR, "../data/images/mac_icon.png"))
+if not os.path.exists(ICON_MAC_PATH):
+    ICON_MAC_PATH = os.path.abspath(os.path.join(LAUNCH_DIR, "../share/minigalaxy/images/mac_icon.png"))
+
+ICON_WINDOWS_LIGHT_PATH = os.path.abspath(os.path.join(LAUNCH_DIR, "../data/images/windows_icon_light.png"))
+if not os.path.exists(ICON_WINDOWS_LIGHT_PATH):
+    ICON_WINDOWS_LIGHT_PATH = os.path.abspath(os.path.join(LAUNCH_DIR, "../share/minigalaxy/images/windows_icon_light.png"))
+
+ICON_LINUX_LIGHT_PATH = os.path.abspath(os.path.join(LAUNCH_DIR, "../data/images/linux_icon_light.png"))
+if not os.path.exists(ICON_LINUX_LIGHT_PATH):
+    ICON_LINUX_LIGHT_PATH = os.path.abspath(os.path.join(LAUNCH_DIR, "../share/minigalaxy/images/linux_icon_light.png"))
+
+ICON_MAC_LIGHT_PATH = os.path.abspath(os.path.join(LAUNCH_DIR, "../data/images/mac_icon_light.png"))
+if not os.path.exists(ICON_MAC_LIGHT_PATH):
+    ICON_MAC_LIGHT_PATH = os.path.abspath(os.path.join(LAUNCH_DIR, "../share/minigalaxy/images/mac_icon_light.png"))
+
+
 ICON_UPDATE_PATH = os.path.abspath(os.path.join(LAUNCH_DIR, "../data/images/update_available.png"))
 if not os.path.exists(ICON_UPDATE_PATH):
     ICON_UPDATE_PATH = os.path.abspath(os.path.join(LAUNCH_DIR, "../share/minigalaxy/images/update_available.png"))

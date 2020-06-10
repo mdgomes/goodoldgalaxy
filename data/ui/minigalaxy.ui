@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.36.0 
+
+Copyright (C) Wouter Wijsman
+
+This file is part of MiniGalaxy.
+
+MiniGalaxy is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+MiniGalaxy is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with MiniGalaxy.  If not, see <http://www.gnu.org/licenses/>.
+
+Author: Miguel Gomes
+
+-->
+<interface domain="minigalaxy">
+  <requires lib="gtk+" version="3.20"/>
+  <!-- interface-local-resource-path /home/fahrenheit/workspace/minigalaxy/data/ui -->
+  <!-- interface-license-type gplv3 -->
+  <!-- interface-name MiniGalaxy -->
+  <!-- interface-description GOG.com API client -->
+  <!-- interface-copyright Wouter Wijsman -->
+  <!-- interface-authors Miguel Gomes\t -->
+</interface>

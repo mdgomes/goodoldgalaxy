@@ -2,10 +2,15 @@ import os
 import time
 from urllib.parse import urlencode
 import requests
+import json
+import math
+from typing import List
 from minigalaxy.game import Game
 from minigalaxy.constants import IGNORE_GAME_IDS, SESSION
+from minigalaxy.paths import CACHE_DIR
 from minigalaxy.config import Config
-
+from minigalaxy.download import Download
+from minigalaxy.download_manager import DownloadManager
 
 class NoDownloadLinkFound(BaseException):
     pass
@@ -75,6 +80,8 @@ class Api:
         current_page = 1
         all_pages_processed = False
         url = "https://embed.gog.com/account/getFilteredProducts"
+        
+        tags = {}
 
         while not all_pages_processed:
             params = {
@@ -83,27 +90,40 @@ class Api:
             }
             response = self.__request(url, params=params)
             total_pages = response["totalPages"]
+            
+            if response["tags"]:
+                for tag in response["tags"]:
+                    tags[tag["id"]] = tag["name"]
 
             for product in response["products"]:
-                if product["id"] not in IGNORE_GAME_IDS:
-                    # Only support Linux unless the show_windows_games setting is enabled
-                    if product["worksOn"]["Linux"]:
-                        platform = "linux"
-                    elif (Config.get("show_windows_games") and product["worksOn"]["Windows"]):
-                        platform = "windows"
-                    else:
-                        continue
-                    if not product["url"]:
-                        print("{} ({}) has no store page url".format(product["title"], product['id']))
-                    supported_platforms = []
-                    if product["worksOn"]["Linux"]:
-                        supported_platforms.append("linux")
-                    if product["worksOn"]["Windows"]:
-                        supported_platforms.append("windows")
-                    if product["worksOn"]["Mac"]:
-                        supported_platforms.append("mac")
-                    game = Game(name=product["title"], url=product["url"], game_id=product["id"], image_url=product["image"], platform=platform, updates=product["updates"], dlcCount=product["dlcCount"], tags=product["tags"], category=product["category"], supported_platforms=supported_platforms)
-                    games.append(game)
+                try:
+                    if product["id"] not in IGNORE_GAME_IDS:
+                        if not product["url"]:
+                            print("{} ({}) has no store page url".format(product["title"], product['id']))
+                        supported_platforms = []
+                        if product["worksOn"]["Linux"]:
+                            supported_platforms.append("linux")
+                        if product["worksOn"]["Windows"]:
+                            supported_platforms.append("windows")
+                        if product["worksOn"]["Mac"]:
+                            supported_platforms.append("mac")
+                        ptags = []
+                        if product["tags"]:
+                            for tag in product["tags"]:
+                                ptags.append(tags[tag])
+                        release_date = None
+                        if "releaseDate" in product:
+                            release_date = product["releaseDate"]
+                        game = Game(name=product["title"], url=product["url"], game_id=product["id"])
+                        game.updates=0
+                        game.installed = 0
+                        game.tags=ptags if len(ptags) > 0 else None
+                        game.set_main_genre(product["category"])
+                        game.supported_platforms=supported_platforms
+                        game.release_date = release_date
+                        games.append(game)
+                except Exception as e:
+                    print(e)
             if current_page == total_pages:
                 all_pages_processed = True
             current_page += 1
@@ -125,9 +145,85 @@ class Api:
     # Get Extrainfo about a game
     def get_info(self, game: Game) -> tuple:
         request_url = "https://api.gog.com/products/" + str(game.id) + "?expand=downloads,expanded_dlcs,description," \
-                                                                       "screenshots,videos,related_products,changelog "
+                                                                       "screenshots,videos,related_products,changelog"
+        game_dir = os.path.join(CACHE_DIR, "game/{}".format(game.id))
+        if os.path.exists(game_dir) == False:
+            os.makedirs(game_dir)
+        file_path = os.path.join(game_dir,"info.json")
+        do_request = True;
+        if os.path.exists(file_path) == True and time.time() - os.path.getmtime(file_path) < 60 * 60 * 24:
+            do_request = False
+        if do_request == True:
+            response = self.__request(request_url)
+            with open(file_path,'w') as outfile:
+                json.dump(response, outfile)
+        else:
+            with open(file_path,'r') as infile:
+                response = json.load(infile)
+        return response
+    
+    # Get Extrainfo about several games
+    def get_infos(self, games: List[Game]) -> tuple:
+        glen = len(games)
+        if glen <= 50:
+            return self.__get_infos(games)
+        else:
+            pages = math.ceil(glen / 50.0)
+            page = 0
+            response = []
+            while page <= pages:
+                start = page * 50
+                end = start + 50 
+                resp = self.__get_infos(games[start:end])
+                for idx in resp:
+                    response.append(idx)
+                page += 1
+            return response
+    
+    # Get Extrainfo about several games
+    def __get_infos(self, games: List[Game]) -> tuple:
+        ids = ""
+        idx = 0
+        glen = len(games)
+        found = 0
+        bypass_cache = False
+        cache_validity = 60 * 60 * 24
+        # compose ids and figure out if we can serve from cache
+        for game in games:
+            game_dir = os.path.join(CACHE_DIR, "game/{}".format(game.id))
+            if os.path.exists(game_dir) == False:
+                os.makedirs(game_dir)
+            file_path = os.path.join(game_dir,"info.json")
+            if os.path.exists(file_path) == True:
+                found += 1
+                if time.time() - os.path.getmtime(file_path) > cache_validity:
+                    bypass_cache = True
+            ids += str(game.id)
+            if idx < glen - 1:
+                ids += ","
+            idx += 1
+        request_url = "https://api.gog.com/products?ids=" + ids + "&expand=downloads,expanded_dlcs,description," \
+                                                                       "screenshots,videos,related_products,changelog"
+        # can we serve this from cache
+        if found == glen and bypass_cache == False:
+            # load from individual cached files
+            response = []
+            for game in games:
+                game_dir = os.path.join(CACHE_DIR, "game/{}".format(game.id))
+                file_path = os.path.join(game_dir,"info.json")
+                with open(file_path,'r') as infile:
+                    response.append(json.load(infile))
+            return response
+        # execute the request and store individual files
         response = self.__request(request_url)
-
+        for g in response:
+            gid = g["id"]
+            game_dir = os.path.join(CACHE_DIR, "game/{}".format(gid))
+            if os.path.exists(game_dir) == False:
+                os.makedirs(game_dir)
+            file_path = os.path.join(game_dir,"info.json")
+            with open(file_path,'w') as outfile:
+                json.dump(g, outfile)
         return response
 
     # This returns a unique download url and a link to the checksum of the download
@@ -158,14 +254,34 @@ class Api:
     def get_real_download_link(self, url):
         return self.__request(url)['downlink']
 
-    def get_user_info(self) -> str:
+    def get_user_info(self,finish_fn = None) -> str:
         username = Config.get("username")
-        if not username:
+        userid = Config.get("user_id")
+        avatar = None
+        if userid is not None:
+            user_dir = os.path.join(CACHE_DIR, "user/{}".format(userid))
+            if os.path.exists(user_dir) == False:
+                os.makedirs(user_dir)
+            avatar = os.path.join(user_dir, "avatar_menu_user_av_small.jpg")
+            if not (os.path.isfile(avatar) and os.path.exists(avatar)):
+                avatar = None
+            if (avatar is not None and finish_fn is not None):
+                finish_fn()
+        if not username or not avatar:
             url = "https://embed.gog.com/userData.json"
             response = self.__request(url)
             username = response["username"]
+            userid = response["userId"]
+            Config.set("user_id", userid)
             Config.set("username", username)
+            user_dir = os.path.join(CACHE_DIR, "user/{}".format(userid))
+            if os.path.exists(user_dir) == False:
+                os.makedirs(user_dir)
+            avatar = os.path.join(user_dir, "avatar_menu_user_av_small.jpg")
+            download = Download(response["avatar"]+"_menu_user_av_small.jpg", avatar, finish_func=finish_fn)
+            DownloadManager.download_now(download)
         return username
+
 
     def can_connect(self) -> bool:
         url = "https://embed.gog.com"
