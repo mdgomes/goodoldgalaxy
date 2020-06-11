@@ -171,7 +171,6 @@ class Library():
             return self.games
         # wait a some time before calling the API again
         if (forced == False and time.time() - self.last_api_check < 30):
-            self.last_api_check = time.time()
             return self.games;
         # rebuild list
         self.fetching = 1

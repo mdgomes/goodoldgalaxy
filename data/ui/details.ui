@@ -2,6 +2,72 @@
 <!-- Generated with glade 3.36.0 -->
 <interface domain="minigalaxy">
   <requires lib="gtk+" version="3.22"/>
+  <object class="GtkPopover" id="downloads_menu">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkModelButton" id="menu_button_install_content">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="text" translatable="yes">Install</property>
+            <signal name="clicked" handler="on_menu_button_install_content_clicked" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="menu_button_uninstall_content">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="text" translatable="yes">Uninstall</property>
+            <signal name="clicked" handler="on_menu_button_uninstall_content_clicked" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="menu_button_update_content">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="text" translatable="yes">Update</property>
+            <signal name="clicked" handler="on_menu_button_update_content_clicked" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="menu_button_download_content">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="text" translatable="yes">Download</property>
+            <signal name="clicked" handler="on_menu_button_download_content_clicked" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkListStore" id="downloads_treemodel">
     <columns>
       <!-- column-name Name -->
@@ -15,6 +81,8 @@
       <!-- column-name Size -->
       <column type="guchar"/>
       <!-- column-name guchar1 -->
+      <column type="guchar"/>
+      <!-- column-name guchar2 -->
       <column type="guchar"/>
     </columns>
   </object>
@@ -684,6 +752,7 @@
                     <property name="margin_top">5</property>
                     <property name="margin_bottom">5</property>
                     <property name="hexpand">False</property>
+                    <signal name="button-press-event" handler="on_downloads_button_pressed" swapped="no"/>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection"/>
                     </child>
@@ -719,6 +788,7 @@
                     <property name="margin_top">5</property>
                     <property name="margin_bottom">5</property>
                     <property name="hexpand">False</property>
+                    <signal name="button-press-event" handler="on_goodies_button_pressed" swapped="no"/>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection"/>
                     </child>
@@ -864,6 +934,37 @@
               </object>
               <packing>
                 <property name="position">2</property>
+                <property name="tab_fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="achievements_box">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="valign">start</property>
+                <property name="margin_start">5</property>
+                <property name="margin_end">5</property>
+                <property name="margin_top">5</property>
+                <property name="margin_bottom">5</property>
+                <property name="hexpand">False</property>
+                <property name="vexpand">True</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel" id="achievements_tab_header">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Achievements</property>
+              </object>
+              <packing>
+                <property name="position">3</property>
                 <property name="tab_fill">False</property>
               </packing>
             </child>

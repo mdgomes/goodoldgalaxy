@@ -4,9 +4,7 @@ import subprocess
 import stat
 import gi
 from xdg.DesktopEntry import DesktopEntry
-from os import path
 import re
-import xdg
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib
 from minigalaxy.translation import _
@@ -14,6 +12,7 @@ from minigalaxy.paths import CACHE_DIR, THUMBNAIL_DIR
 from minigalaxy.config import Config
 from minigalaxy.gogextract import extract_installer
 from minigalaxy.game import Game
+from pathlib import Path
 
 def copytree(src, dst, symlinks = False, ignore = None):
     if not os.path.exists(dst):
@@ -41,12 +40,19 @@ def copytree(src, dst, symlinks = False, ignore = None):
         else:
             shutil.copy2(s, d)
 
+def uninstall_freedesktop_menuitem(game: Game):
+    entry_name = re.sub('[^A-Za-z0-9_]+', '', game.name.replace(" ","_"))
+    fpath = os.path.join(Path.home(),".local/share/applications/gog_com-"+entry_name+".desktop")
+    if os.path.exists(fpath):
+        os.remove(fpath, dir_fd=None)
+
 def install_freedesktop_menuitem(game: Game):
     icon = os.path.join(game.install_dir,"support/icon.png")
     play = os.path.join(game.install_dir,"start.sh")
     # create a new desktop entry
     entry_name = re.sub('[^A-Za-z0-9_]+', '', game.name.replace(" ","_"))
-    entry = DesktopEntry(os.path.join("~/.local/share/applications/","gog_com-"+entry_name+".desktop"))
+    fpath = os.path.join(Path.home(),".local/share/applications/gog_com-"+entry_name+".desktop")
+    entry = DesktopEntry(fpath)
     entry.set("Encoding", "UTF-8")
     entry.set("Value", "1.0")
     entry.set("Type", "Application")
@@ -57,6 +63,15 @@ def install_freedesktop_menuitem(game: Game):
     entry.set("Exec","\""+play+"\" \"\"")
     entry.set("Categories", "Game;")
     entry.set("Path",game.install_dir)
+    entry.write(fpath, True)
+    
+def uninstall_freedesktop_desktopitem(game: Game):
+    entry_name = re.sub('[^A-Za-z0-9_]+', '', game.name.replace(" ","_"))
+    cp = subprocess.run(["xdg-user-dir", "DESKTOP"], capture_output=True)
+    desktop_dir=cp.stdout.decode().strip()+"/"
+    fpath = os.path.join(desktop_dir,"gog_com-"+entry_name+".desktop")
+    if os.path.exists(fpath):
+        os.remove(fpath, dir_fd=None)
     
 def install_freedesktop_desktopitem(game: Game):
     icon = os.path.join(game.install_dir,"support/icon.png")
@@ -66,8 +81,8 @@ def install_freedesktop_desktopitem(game: Game):
     # find out desktop location
     cp = subprocess.run(["xdg-user-dir", "DESKTOP"], capture_output=True)
     desktop_dir=cp.stdout.decode().strip()+"/"
-    
-    entry = DesktopEntry(os.path.join(desktop_dir,"gog_com-"+entry_name+".desktop"))
+    fpath = os.path.join(desktop_dir,"gog_com-"+entry_name+".desktop")
+    entry = DesktopEntry(fpath)
     entry.set("Encoding", "UTF-8")
     entry.set("Value", "1.0")
     entry.set("Type", "Application")
@@ -78,7 +93,7 @@ def install_freedesktop_desktopitem(game: Game):
     entry.set("Exec",play)
     entry.set("Categories", "Game;")
     entry.set("Path",game.install_dir)
-    
+    entry.write(fpath, True) 
 
 def create_shortcuts(game: Game):
     if game.platform != "linux":
@@ -166,7 +181,9 @@ def install_game(game, installer, parent_window=None, main_window=None) -> None:
             print("Encountered error while copying {} to {}. Got error: {}".format(installer, keep_dir, ex))
     else:
         os.remove(installer)
-
+    # finish up
+    game.istalled = 1
+    game.updates = 0
 
 def __show_installation_error(game, message, parent_window=None, main_window = None):
     error_message = [_("Failed to install {}").format(game.name), message]
@@ -203,5 +220,15 @@ def __verify_installer_integrity(installer):
         return False
 
 
+def remove_shortcuts(game: Game):
+    if game.platform != "linux":
+        return
+    uninstall_freedesktop_menuitem(game)
+    uninstall_freedesktop_desktopitem(game)
+
 def uninstall_game(game):
+    if Config.get("create_shortcuts") == True:
+            remove_shortcuts(game)
     shutil.rmtree(game.install_dir, ignore_errors=True)
+    game.install_dir = None
+    game.installed_version = None

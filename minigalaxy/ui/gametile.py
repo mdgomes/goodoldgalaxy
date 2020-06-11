@@ -12,7 +12,6 @@ from minigalaxy.download_manager import DownloadManager
 from minigalaxy.launcher import start_game, config_game
 from minigalaxy.css import CSS_PROVIDER
 
-
 @Gtk.Template.from_file(os.path.join(UI_DIR, "gametile.ui"))
 class GameTile(Gtk.Box):
     __gtype_name__ = "GameTile"
@@ -20,17 +19,17 @@ class GameTile(Gtk.Box):
 
     image = Gtk.Template.Child()
     button = Gtk.Template.Child()
-    update_icon = Gtk.Template.Child()
     title_label = Gtk.Template.Child()
+    update_icon = Gtk.Template.Child();
     menu_button = Gtk.Template.Child()
     menu_button_details = Gtk.Template.Child()
-    menu_button_cancel = Gtk.Template.Child()
     menu_button_settings = Gtk.Template.Child()
     menu_button_store = Gtk.Template.Child()
     menu_button_update = Gtk.Template.Child()
     menu_button_support = Gtk.Template.Child()
     menu_button_uninstall = Gtk.Template.Child()
     menu_button_open = Gtk.Template.Child()
+    menu_button_cancel = Gtk.Template.Child()
 
     def __init__(self, parent, game, api):
         Gtk.Frame.__init__(self)
@@ -43,9 +42,9 @@ class GameTile(Gtk.Box):
         self.progress_bar = None
         self.thumbnail_set = False
         self.download = None
-        self.current_state = game.state
+        self.current_state = self.game.state.DOWNLOADABLE
 
-        self.title_label.set_tooltip_text(self.game.name)
+        self.image.set_tooltip_text(self.game.name)
         self.title_label.set_text(self.game.name)
 
         self.reload_state()
@@ -58,17 +57,16 @@ class GameTile(Gtk.Box):
 
         if not self.game.url:
             self.menu_button_store.hide()
+            
+        if self.game.installed == 1:
+            self.menu_button.show()
 
     def __str__(self):
         return self.game.name
-    
-    @Gtk.Template.Callback("on_menu_button_details_clicked")
-    def on_menu_button_details_clicked(self, widget) -> None:
-        self.parent.parent.show_game_details(self.game)
 
     @Gtk.Template.Callback("on_button_clicked")
     def on_button_click(self, widget) -> None:
-        dont_act_in_states = [self.game.state.QUEUED, self.game.state.DOWNLOADING, self.game.state.INSTALLING, self.game.state.UNINSTALLING]
+        dont_act_in_states = [self.game.state.QUEUED, self.game.state.DOWNLOADING, self.game.state.INSTALLING, self.game.state.UNINSTALLING, self.game.state.UPDATING]
         if self.current_state in dont_act_in_states:
             return
         elif self.current_state == self.game.state.INSTALLED or self.current_state == self.game.state.UPDATABLE:
@@ -78,19 +76,13 @@ class GameTile(Gtk.Box):
         elif self.current_state == self.game.state.DOWNLOADABLE:
             self.parent.parent.download_game(self.game)
 
+    @Gtk.Template.Callback("on_menu_button_details_clicked")
+    def on_menu_button_details_clicked(self, widget) -> None:
+        self.parent.parent.show_game_details(self.game)
+
     @Gtk.Template.Callback("on_menu_button_cancel_clicked")
     def on_menu_button_cancel(self, widget):
-        message_dialog = Gtk.MessageDialog(parent=self.parent.parent,
-                                           flags=Gtk.DialogFlags.MODAL,
-                                           message_type=Gtk.MessageType.WARNING,
-                                           buttons=Gtk.ButtonsType.OK_CANCEL,
-                                           message_format=_("Are you sure you want to cancel downloading {}?").format(self.game.name))
-        response = message_dialog.run()
-
-        if response == Gtk.ResponseType.OK:
-            self.parent.parent.prevent_resume_on_startup(self.game)
-            self.parent.parent.cancel_download(self.game)
-        message_dialog.destroy()
+        self.parent.parent.cancel_download(self.game)
 
     @Gtk.Template.Callback("on_menu_button_settings_clicked")
     def on_menu_button_settings(self, widget):
@@ -98,18 +90,7 @@ class GameTile(Gtk.Box):
 
     @Gtk.Template.Callback("on_menu_button_uninstall_clicked")
     def on_menu_button_uninstall(self, widget):
-        message_dialog = Gtk.MessageDialog(parent=self.parent.parent,
-                                           flags=Gtk.DialogFlags.MODAL,
-                                           message_type=Gtk.MessageType.WARNING,
-                                           buttons=Gtk.ButtonsType.OK_CANCEL,
-                                           message_format=_("Are you sure you want to uninstall %s?" % self.game.name))
-        response = message_dialog.run()
-
-        if response == Gtk.ResponseType.OK:
-            self.parent.parent.uninstall(self.game)
-            message_dialog.destroy()
-        elif response == Gtk.ResponseType.CANCEL:
-            message_dialog.destroy()
+        self.parent.parent.uninstall_game(self.game)
 
     @Gtk.Template.Callback("on_menu_button_open_clicked")
     def on_menu_button_open_files(self, widget):
@@ -120,16 +101,10 @@ class GameTile(Gtk.Box):
         try:
             webbrowser.open(self.api.get_info(self.game)['links']['support'], new=2)
         except:
-            dialog = Gtk.MessageDialog(
-                message_type=Gtk.MessageType.ERROR,
-                parent=self.parent.parent,
-                modal=True,
-                buttons=Gtk.ButtonsType.OK,
-                text=_("Couldn't open support page")
+            self.parent.parent.show_eror(
+                _("Couldn't open support page"),
+                _("Please check your internet connection")
             )
-            dialog.format_secondary_text(_("Please check your internet connection"))
-            dialog.run()
-            dialog.destroy()
 
     @Gtk.Template.Callback("on_menu_button_store_clicked")
     def on_menu_button_store(self, widget):
@@ -196,12 +171,13 @@ class GameTile(Gtk.Box):
         self.menu_button_open.hide()
         self.menu_button_uninstall.hide()
         self.menu_button_cancel.hide()
-        self.update_icon.hide()
+        self.menu_button.hide();
         # configure button label and available options
         if (self.current_state == self.game.state.INSTALLED or self.current_state == self.game.state.UPDATABLE):
             self.button.set_label(_("play"))
             self.menu_button_uninstall.show()
             self.menu_button_open.show()
+            self.menu_button.show()
         elif (self.current_state == self.game.state.DOWNLOADABLE):
             self.button.set_label(_("download"))
         elif (self.current_state == self.game.state.DOWNLOADING or self.current_state == self.game.state.UPDATE_DOWNLOADING):
@@ -221,11 +197,14 @@ class GameTile(Gtk.Box):
             self.menu_button_uninstall.show()
             self.menu_button_open.show()
         # special cases 
-        if self.game.installed == 1 and self.game.updates is not None and self.game.updates > 0:
+        if self.game.updates is not None and self.game.updates > 0:
             self.update_icon.show()
+        else:
+            self.update_icon.hide()
+        if self.game.installed == 1 and self.game.updates is not None and self.game.updates > 0:
             # figure out if we should fetch or install the update
             if (self.current_state == self.game.state.UPDATABLE or self.current_state == self.game.state.INSTALLED):
-                self.menu_button_update.set_label(_("Update"))
+                self.menu_button_update.set_label(_("Download Update"))
             elif (self.current_state == self.game.state.UPDATE_INSTALLABLE):
                 self.menu_button_update.set_label(_("Install Update"))
             else:
@@ -237,7 +216,6 @@ class GameTile(Gtk.Box):
             self.menu_button_settings.show()
 
     def reload_state(self):
-        self.game.install_dir = self.game.get_install_dir()
         dont_act_in_states = [self.game.state.QUEUED, self.game.state.DOWNLOADING, self.game.state.INSTALLING, self.game.state.UNINSTALLING, self.game.state.UPDATING, self.game.state.UPDATE_QUEUED, self.game.state.UPDATE_DOWNLOADING]
         if self.current_state in dont_act_in_states:
             return
@@ -254,8 +232,7 @@ class GameTile(Gtk.Box):
         if state == self.game.state.DOWNLOADABLE or state == self.game.state.INSTALLABLE or state == self.game.state.UPDATE_INSTALLABLE:
             self.button.set_sensitive(True)
             self.image.set_sensitive(False)
-            self.game.install_dir = ""
-
+            
             if self.progress_bar:
                 self.progress_bar.destroy()
 
@@ -275,8 +252,6 @@ class GameTile(Gtk.Box):
             self.button.set_sensitive(False)
             self.image.set_sensitive(True)
 
-            self.game.install_dir = self.game.get_install_dir()
-
             if self.progress_bar:
                 self.progress_bar.destroy()
 
@@ -286,7 +261,6 @@ class GameTile(Gtk.Box):
             # self.button.get_style_context().add_class("suggested-action")
             self.button.set_sensitive(True)
             self.image.set_sensitive(True)
-            self.game.install_dir = self.game.get_install_dir()
 
             if self.progress_bar:
                 self.progress_bar.destroy()
@@ -294,8 +268,6 @@ class GameTile(Gtk.Box):
         elif state == self.game.state.UNINSTALLING:
             self.button.set_sensitive(False)
             self.image.set_sensitive(False)
-
-            self.game.install_dir = ""
 
             self.parent.filter_library()
 

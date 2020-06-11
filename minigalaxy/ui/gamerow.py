@@ -105,17 +105,7 @@ class GameRow(Gtk.Box):
 
     @Gtk.Template.Callback("on_menu_button_cancel_clicked")
     def on_menu_button_cancel(self, widget):
-        message_dialog = Gtk.MessageDialog(parent=self.parent.parent,
-                                           flags=Gtk.DialogFlags.MODAL,
-                                           message_type=Gtk.MessageType.WARNING,
-                                           buttons=Gtk.ButtonsType.OK_CANCEL,
-                                           message_format=_("Are you sure you want to cancel downloading {}?").format(self.game.name))
-        response = message_dialog.run()
-
-        if response == Gtk.ResponseType.OK:
-            self.parent.parent.prevent_resume_on_startup(self.game)
-            self.parent.parent.cancel_download(self.game)
-        message_dialog.destroy()
+        self.parent.parent.cancel_download(self.game)
 
     @Gtk.Template.Callback("on_menu_button_settings_clicked")
     def on_menu_button_settings(self, widget):
@@ -123,18 +113,7 @@ class GameRow(Gtk.Box):
 
     @Gtk.Template.Callback("on_menu_button_uninstall_clicked")
     def on_menu_button_uninstall(self, widget):
-        message_dialog = Gtk.MessageDialog(parent=self.parent.parent,
-                                           flags=Gtk.DialogFlags.MODAL,
-                                           message_type=Gtk.MessageType.WARNING,
-                                           buttons=Gtk.ButtonsType.OK_CANCEL,
-                                           message_format=_("Are you sure you want to uninstall %s?" % self.game.name))
-        response = message_dialog.run()
-
-        if response == Gtk.ResponseType.OK:
-            self.parent.parent.uninstall(self.game)
-            message_dialog.destroy()
-        elif response == Gtk.ResponseType.CANCEL:
-            message_dialog.destroy()
+        self.parent.parent.uninstall_game(self.game)
 
     @Gtk.Template.Callback("on_menu_button_open_clicked")
     def on_menu_button_open_files(self, widget):
@@ -245,7 +224,6 @@ class GameRow(Gtk.Box):
             self.menu_button_settings.show()
 
     def reload_state(self):
-        self.game.install_dir = self.game.get_install_dir()
         dont_act_in_states = [self.game.state.QUEUED, self.game.state.DOWNLOADING, self.game.state.INSTALLING, self.game.state.UNINSTALLING, self.game.state.UPDATING, self.game.state.UPDATE_QUEUED, self.game.state.UPDATE_DOWNLOADING]
         if self.current_state in dont_act_in_states:
             return
@@ -262,7 +240,6 @@ class GameRow(Gtk.Box):
         if state == self.game.state.DOWNLOADABLE or state == self.game.state.INSTALLABLE or state == self.game.state.UPDATE_INSTALLABLE:
             self.button.set_sensitive(True)
             self.image.set_sensitive(False)
-            self.game.install_dir = ""
 
             if self.progress_bar:
                 self.progress_bar.destroy()
@@ -283,8 +260,6 @@ class GameRow(Gtk.Box):
             self.button.set_sensitive(False)
             self.image.set_sensitive(True)
 
-            self.game.install_dir = self.game.get_install_dir()
-
             if self.progress_bar:
                 self.progress_bar.destroy()
 
@@ -294,7 +269,6 @@ class GameRow(Gtk.Box):
             # self.button.get_style_context().add_class("suggested-action")
             self.button.set_sensitive(True)
             self.image.set_sensitive(True)
-            self.game.install_dir = self.game.get_install_dir()
 
             if self.progress_bar:
                 self.progress_bar.destroy()
@@ -302,8 +276,6 @@ class GameRow(Gtk.Box):
         elif state == self.game.state.UNINSTALLING:
             self.button.set_sensitive(False)
             self.image.set_sensitive(False)
-
-            self.game.install_dir = ""
 
             self.parent.filter_library()
 

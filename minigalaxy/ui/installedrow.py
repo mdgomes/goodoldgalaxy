@@ -34,9 +34,7 @@ class InstalledRow(Gtk.Box):
         self.load_icon()
 
         # Icon if update is available
-        if self.game.updates is not None and self.game.updates > 0:
-            self.update_icon.set_from_icon_name("gtk-refresh",4)
-            self.update_icon.show()
+        self.update_options()
         
 
     def __str__(self):
@@ -83,12 +81,35 @@ class InstalledRow(Gtk.Box):
     def update_to_state(self, state):
         self.current_state = state
         if state == self.game.state.QUEUED or state == self.game.state.UPDATE_QUEUED:
+            self.image.set_sensitive(False)
             self.__create_progress_bar()
         elif state == self.game.state.DOWNLOADING or state == self.game.state.UPDATE_DOWNLOADING:
+            self.image.set_sensitive(False)
             if not self.progress_bar:
                 self.__create_progress_bar()
             self.progress_bar.show_all()
-
         else:
+            self.image.set_sensitive(True)
             if self.progress_bar:
                 self.progress_bar.destroy()
+        self.update_options()
+
+    def update_options(self):
+        # special cases 
+        if self.game.updates is not None and self.game.updates > 0:
+            self.update_icon.set_from_icon_name("gtk-refresh",4)
+            self.update_icon.show()
+        else:
+            self.update_icon.hide()
+               
+    def reload_state(self):
+        dont_act_in_states = [self.game.state.QUEUED, self.game.state.DOWNLOADING, self.game.state.INSTALLING, self.game.state.UNINSTALLING, self.game.state.UPDATING, self.game.state.UPDATE_QUEUED, self.game.state.UPDATE_DOWNLOADING]
+        if self.current_state in dont_act_in_states:
+            return
+        if self.game.install_dir and os.path.exists(self.game.install_dir):
+            self.update_to_state(self.game.state.INSTALLED)
+        elif os.path.exists(self.keep_path):
+            self.update_to_state(self.game.state.INSTALLABLE)
+        else:
+            self.update_to_state(self.game.state.DOWNLOADABLE)
+        self.update_options()

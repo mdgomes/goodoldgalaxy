@@ -1,16 +1,17 @@
 import os
 import time
 from urllib.parse import urlencode
-import requests
 import json
 import math
 from typing import List
 from minigalaxy.game import Game
+from minigalaxy.achievement import Achievement
 from minigalaxy.constants import IGNORE_GAME_IDS, SESSION
 from minigalaxy.paths import CACHE_DIR
 from minigalaxy.config import Config
 from minigalaxy.download import Download
 from minigalaxy.download_manager import DownloadManager
+from minigalaxy import achievement
 
 class NoDownloadLinkFound(BaseException):
     pass
@@ -162,6 +163,39 @@ class Api:
                 response = json.load(infile)
         return response
     
+    # Get user achievements for a given game
+    def get_game_achievements(self, game: Game) -> List[Achievement]:
+        request_url = "https://gameplay.gog.com/clients/" + str(game.id) + "/users/"+str(Config.get("user_id"))+"/achievements"
+        game_dir = os.path.join(CACHE_DIR, "game/{}".format(game.id))
+        if os.path.exists(game_dir) == False:
+            os.makedirs(game_dir)
+        file_path = os.path.join(game_dir,"achievements.json")
+        do_request = True;
+        if os.path.exists(file_path) == True and time.time() - os.path.getmtime(file_path) < 60 * 60 * 24:
+            do_request = False
+        if do_request == True:
+            response = self.__request(request_url)
+            with open(file_path,'w') as outfile:
+                json.dump(response, outfile)
+        else:
+            with open(file_path,'r') as infile:
+                response = json.load(infile)
+        
+        achievements = []
+        for item in response["items"]:
+            try:
+                achievement = Achievement(game,item["achievement_id"],item["achievement_key"])
+                achievement.visible = item["visible"]
+                achievement.name = item["name"]
+                achievement.description = item["description"]
+                achievement.image_url_unlocked = item["image_url_unlocked"]
+                achievement.image_url_locked = item["image_url_locked"]
+                achievement.date_unlocked = item["date_unlocked"]
+                achievements.append(achievement)
+            except Exception as e:
+                print(e)
+        return achievements
+    
     # Get Extrainfo about several games
     def get_infos(self, games: List[Game]) -> tuple:
         glen = len(games)
@@ -286,8 +320,9 @@ class Api:
     def can_connect(self) -> bool:
         url = "https://embed.gog.com"
         try:
-            SESSION.get(url, timeout=5)
-        except requests.exceptions.ConnectionError:
+            SESSION.get(url, timeout=10)
+        except Exception as ex:
+            print("Could not validate that connection with GOG is possible. Cause: {}".format(ex))
             return False
         return True
 

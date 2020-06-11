@@ -3,7 +3,7 @@ import gi
 import threading
 import platform
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GdkPixbuf,GLib
+from gi.repository import Gtk, GdkPixbuf,GLib, Gdk
 from minigalaxy.ui.login import Login
 from minigalaxy.ui.preferences import Preferences
 from minigalaxy.ui.about import About
@@ -42,6 +42,12 @@ class Window(Gtk.ApplicationWindow):
         self.library = Library(self.api)
         self.games = []
         self.library_view = LibraryView(self,library=self.library,api=self.api)
+        self.details = None
+        
+        res = self.get_screen_resolution()
+        # we got resolution
+        if res[0] > 0 and res[0] <= 1368:
+            self.set_default_size(1024,700)   
         
         # Set the icon
         icon = GdkPixbuf.Pixbuf.new_from_file(LOGO_IMAGE_PATH)
@@ -72,6 +78,31 @@ class Window(Gtk.ApplicationWindow):
         else:
             self.__show_library()
 
+    def get_screen_resolution(self, measurement="px"):
+        """
+        Tries to detect the screen resolution from the system.
+        @param measurement: The measurement to describe the screen resolution in. Can be either 'px', 'inch' or 'mm'. 
+        @return: (screen_width,screen_height) where screen_width and screen_height are int types according to measurement.
+        """
+        mm_per_inch = 25.4
+        try: # Platforms supported by GTK3, Fx Linux/BSD
+            screen = Gdk.Screen.get_default()
+            if measurement=="px":
+                width = screen.get_width()
+                height = screen.get_height()
+            elif measurement=="inch":
+                width = screen.get_width_mm()/mm_per_inch
+                height = screen.get_height_mm()/mm_per_inch
+            elif measurement=="mm":
+                width = screen.get_width_mm()
+                height = screen.get_height_mm()
+            else:
+                raise NotImplementedError("Handling %s is not implemented." % measurement)
+            return (width,height)
+        except Exception as ex:
+            print("Could not obtain screen resolution. Cause: {}".format(ex))
+            return (-1,-1)
+
     # Downloads if Minigalaxy was closed with this game downloading
     def resume_download_if_expected(self):
         download_id = Config.get("current_download")
@@ -93,6 +124,7 @@ class Window(Gtk.ApplicationWindow):
         # first remove any existing child
         if len(self.selection_window.get_children()) > 0:
             self.selection_window.remove(self.selection_window.get_children()[0])
+        self.details = None
         self.selection_window.add(self.library_view)
         
     def update_library_view(self):
@@ -104,7 +136,9 @@ class Window(Gtk.ApplicationWindow):
         # first remove any existing child
         if len(self.selection_window.get_children()) > 0:
             self.selection_window.remove(self.selection_window.get_children()[0])
-        self.selection_window.add(Details(self,game,self.api))
+        self.details = Details(self,game,self.api)
+        self.selection_window.add(self.details)
+        self.selection_window.get_vadjustment().set_value(0)
     
     def __set_avatar(self):
         user_dir = os.path.join(CACHE_DIR, "user/{}".format(Config.get("user_id")))
@@ -133,10 +167,19 @@ class Window(Gtk.ApplicationWindow):
         install_thread.start()
             
     def uninstall_game(self, game: Game):
-        # Remove game from sidebar if it is there
-        if game.sidebar_tile is not None:
-            self.installed_list.remove_child(game.sidebar_tile)
-        uninstall_game(game)
+        message_dialog = Gtk.MessageDialog(parent=self,
+                                           flags=Gtk.DialogFlags.MODAL,
+                                           message_type=Gtk.MessageType.WARNING,
+                                           buttons=Gtk.ButtonsType.OK_CANCEL,
+                                           message_format=_("Are you sure you want to uninstall %s?" % game.name))
+        response = message_dialog.run()
+
+        if response == Gtk.ResponseType.OK:
+            uninstall_thread = threading.Thread(target=self.__uninstall_game,args=[game])
+            uninstall_thread.start()
+            message_dialog.destroy()
+        elif response == Gtk.ResponseType.CANCEL:
+            message_dialog.destroy()
             
     def __update_to_state(self, state, game: Game):
         game.state = state
@@ -146,6 +189,8 @@ class Window(Gtk.ApplicationWindow):
             game.grid_tile.update_to_state(state)
         if game.sidebar_tile is not None:
             game.sidebar_tile.update_to_state(state)
+        if self.details is not None and self.details.game == game:
+            self.details.update_to_state(state)
                     
     def download_game(self, game: Game):
         if game.sidebar_tile is None:
@@ -209,9 +254,33 @@ class Window(Gtk.ApplicationWindow):
             GLib.idle_add(self.__update_to_state, game.state.DOWNLOADABLE, game)
             return
         GLib.idle_add(self.__update_to_state, game.state.INSTALLED, game)
+        GLib.idle_add(self.__reload_state, game)
+
+    def __reload_state(self,game: Game = None):
+        if game.list_tile is not None:
+            game.list_tile.reload_state()
+        if game.grid_tile is not None:
+            game.grid_tile.reload_state()
+        if game.sidebar_tile is not None:
+            game.sidebar_tile.reload_state()
 
     def cancel_download(self, game: Game = None):
+        message_dialog = Gtk.MessageDialog(parent=self,
+                                           flags=Gtk.DialogFlags.MODAL,
+                                           message_type=Gtk.MessageType.WARNING,
+                                           buttons=Gtk.ButtonsType.OK_CANCEL,
+                                           message_format=_("Are you sure you want to cancel downloading {}?").format(game.name))
+        response = message_dialog.run()
+
+        if response == Gtk.ResponseType.OK:
+            self.prevent_resume_on_startup(game)
+            cancel_thread = threading.Thread(target=self.__cancel_download,args=[game])
+            cancel_thread.start()
+        message_dialog.destroy()
+
+    def __cancel_download(self, game: Game = None):
         DownloadManager.cancel_download(game.downloads)
+        GLib.idle_add(self.__reload_state,game)
         if game.state == game.state.DOWNLOADING:
             ## remove sidebar tile
             if game.sidebar_tile is not None:
@@ -220,17 +289,14 @@ class Window(Gtk.ApplicationWindow):
             GLib.idle_add(self.__update_to_state, game.state.DOWNLOADABLE, game)
         elif game.state == game.state.UPDATE_DOWNLOADING:
             GLib.idle_add(self.__update_to_state, game.state.INSTALLED, game)
-        GLib.idle_add(self.__reload_state,game)
-
-    def __reload_state(self,game: Game = None):
-        if game.list_tile is not None:
-            game.list_tile.reload_state()
-        if game.grid_tile is not None:
-            game.grid_tile.reload_state()
-
-    def __cancel_download(self, game: Game = None):
-        GLib.idle_add(self.__update_to_state, game.state.DOWNLOADABLE, game)
-        GLib.idle_add(self.__reload_state,game)
+    
+    def download_update(self, game: Game):
+        if game.sidebar_tile is None:
+            game.sidebar_tile = InstalledRow(self, game, self.api)
+            GLib.idle_add(self.installed_list.prepend,game.sidebar_tile)
+        # start download
+        download_thread = threading.Thread(target=self.__download_update,args=[game])
+        download_thread.start()
         
     def __download_update(self,game: Game = None) -> None:
         Config.set("current_download", game.id)
@@ -293,9 +359,11 @@ class Window(Gtk.ApplicationWindow):
 
     def __uninstall_game(self,game: Game = None):
         GLib.idle_add(self.__update_to_state, game.state.UNINSTALLING, game)
-        self.uninstall_game(game)
+        # Remove game from sidebar if it is there
+        if game.sidebar_tile is not None:
+            self.installed_list.remove(game.sidebar_tile.get_parent())
+        uninstall_game(game)
         GLib.idle_add(self.__update_to_state, game.state.DOWNLOADABLE, game)
-        GLib.idle_add(self.reload_state)
 
     @Gtk.Template.Callback("on_selection_button_clicked")
     def on_selection_button_clicked(self, button):
@@ -370,7 +438,11 @@ class Window(Gtk.ApplicationWindow):
         if not self.api.can_connect():
             return
 
-        authenticated = self.api.authenticate(refresh_token=token, login_code=url)
+        try:
+            authenticated = self.api.authenticate(refresh_token=token, login_code=url)
+        except Exception as ex:
+            print("Could not authenticate with GOG. Cause: {}".format(ex))
+            return
 
         while not authenticated:
             login_url = self.api.get_login_url()
