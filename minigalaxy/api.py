@@ -117,6 +117,7 @@ class Api:
                             release_date = product["releaseDate"]
                         game = Game(name=product["title"], url=product["url"], game_id=product["id"])
                         game.updates=0
+                        game.image_url = product["image"]
                         game.installed = 0
                         game.tags=ptags if len(ptags) > 0 else None
                         game.set_main_genre(product["category"])
