@@ -1,5 +1,6 @@
 import gi
 from minigalaxy import achievement
+from mesonbuild.msubprojects import download
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf,GLib, Gdk
 import os
@@ -215,8 +216,8 @@ class Details(Gtk.Viewport):
         # downloads
         didx=0
         gidx=0
-        downloads_store = Gtk.ListStore(str,GdkPixbuf.Pixbuf,str,str,str,str,str)
-        downloads_cols = [_("Name"),_("OS"),_("Language"),_("Type"),_("Size"),_("Version"),_("Location")]
+        downloads_store = Gtk.ListStore(str,GdkPixbuf.Pixbuf,str,str,str,str,str,str)
+        downloads_cols = [_("Name"),_("OS"),_("Language"),_("Type"),_("Size"),_("Version"),_("State"),_("Location")]
         goodies_store = Gtk.ListStore(str,str,str,str,str,str)
         goodies_cols = [_("Name"),_("Category"),_("Type"),_("Size"),_("Count"),_("Location")]
         self.downloads_languages = set()
@@ -237,7 +238,13 @@ class Details(Gtk.Viewport):
                             self.goodies_links.append(link)
                     else:
                         didx += 1
-                        links = self.__append_to_list_store_for_download(downloads_store,item,download_type)
+                        state = "N/A"
+                        if self.game.installed == 1:
+                            if self.game.installed_version == item["version"]:
+                                state = _("Installed")
+                            else:
+                                state = _("Update Available")
+                        links = self.__append_to_list_store_for_download(downloads_store,item,download_type,state=state)
                         for link in links:
                             self.download_links.append(link)
         if "expanded_dlcs" in self.response:
@@ -256,14 +263,14 @@ class Details(Gtk.Viewport):
                                 self.goodies_links.append(link)
                         else:
                             didx += 1
-                            links = self.__append_to_list_store_for_download(downloads_store,item,"DLC "+download_type)
+                            state = "N/A"
+                            links = self.__append_to_list_store_for_download(downloads_store,item,"DLC "+download_type,state=state)
                             for link in links:
                                 self.download_links.append(link)
         if (didx > 0):
             self.downloads_filter = downloads_store.filter_new()
             self.downloads_filter.set_visible_func(self.__downloads_filter,data=None)
             self.downloadstree.set_model(self.downloads_filter)
-            self.downloadstree.get_selection().connect("changed",self.__on_download_selected)
             self.__create_tree_columns(self.downloadstree,downloads_cols)
             for lang in self.downloads_languages:
                 ck = Gtk.CheckButton(lang)
@@ -277,7 +284,6 @@ class Details(Gtk.Viewport):
             self.downloads_filter.refilter()
         if (gidx > 0):
             self.goodiestree.set_model(goodies_store)
-            self.goodiestree.get_selection().connect("changed",self.__on_goodie_selected)
             self.__create_tree_columns(self.goodiestree,goodies_cols,True)
             self.goodies_header.show()
             self.goodiestree.show_all()
@@ -330,10 +336,89 @@ class Details(Gtk.Viewport):
     @Gtk.Template.Callback("on_downloads_button_pressed")
     def on_downloads_button_pressed(self, widget: Gtk.Widget, event: Gdk.EventButton):
         if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.get_button().button == Gdk.BUTTON_SECONDARY:
-            self.downloads_menu.set_pointing_to(Gdk.Rectangle(x=event.x_root,y=event.y_root,width=1,height=1))
-            self.downloads_menu.set_relative_to(self.downloadstree)
-            self.downloads_menu.popup()
+            # find out what was selected
+            res = self.downloadstree.get_path_at_pos(event.x, event.y)
+            state = None
+            link = None
+            fname = None
+            ftype = None
+            if res is not None:
+                path = res[0]
+                treeiter:Gtk.TreeIter = self.downloadstree.get_model().get_iter(path)
+                fname = self.downloadstree.get_model().get_value(treeiter,0)
+                ftype = self.downloadstree.get_model().get_value(treeiter,2)
+                state = self.downloadstree.get_model().get_value(treeiter,6)
+                link = self.downloadstree.get_model().get_value(treeiter,7)
+            # find out what was selected
+            menu:Gtk.Menu = Gtk.Menu ()
+            if state == _("Update Available"):
+                update_item:Gtk.MenuItem = Gtk.MenuItem.new_with_label(_("Update"))
+                menu.add(update_item)
+            if state == _("Update Available") or state == _("Installed"):
+                uninstall_item:Gtk.MenuItem = Gtk.MenuItem.new_with_label(_("Uninstall"))
+                menu.add(uninstall_item)
+            if state == None or state == _("N/A") or state == "":
+                install_item:Gtk.MenuItem = Gtk.MenuItem.new_with_label(_("Install"))
+                install_item.connect("active",self.__install_file,link,ftype)
+                menu.add(install_item)
+            download_item:Gtk.MenuItem = Gtk.MenuItem.new_with_label(_("Download"))
+            download_item.connect("activate",self.__download_file,link,fname)
+            menu.add(download_item)
+            menu.attach_to_widget(self.downloadstree)
+            menu.show_all()
+            menu.popup(None, None, None, None, event.button, event.time)                
         return False
+    
+    @Gtk.Template.Callback("on_goodies_button_pressed")
+    def on_goodies_button_pressed(self, widget: Gtk.Widget, event: Gdk.EventButton):
+        if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.get_button().button == Gdk.BUTTON_SECONDARY:
+            # find out what was selected
+            res = self.goodiestree.get_path_at_pos(event.x, event.y)
+            link = None
+            fname = None
+            if res is not None:
+                path = res[0]
+                treeiter:Gtk.TreeIter = self.goodiestree.get_model().get_iter(path)
+                link = self.goodiestree.get_model().get_value(treeiter,5)
+                fname = self.goodiestree.get_model().get_value(treeiter,0)
+            # find out what was selected
+            menu:Gtk.Menu = Gtk.Menu ()
+            download_item:Gtk.MenuItem = Gtk.MenuItem.new_with_label(_("Download"))
+            download_item.connect("activate",self.__download_file,link,fname)
+            menu.add(download_item)
+            menu.attach_to_widget(self.goodiestree)
+            menu.show_all()
+            menu.popup(None, None, None, None, event.button, event.time)                
+        return False
+    
+    def __install_file(self,widget,link:str,ftype:str = None):
+        if (ftype == _("Installer")):
+            # just follow the default path
+            self.parent.download_game(self.game)
+        elif ftype == "DLC "+_("Installer"):
+            
+            download = Download(
+                url=self.api.get_real_download_link(link),
+                save_location=self.game.download_path
+            )
+            DownloadManager.download(download)
+            print("Downloading: \"{}\"".format(link)
+
+    
+    def __download_file(self,widget,link:str,fname:str = None):
+        dialog:Gtk.FileChooserDialog = Gtk.FileChooserDialog(_("Download"),self.parent,action=Gtk.FileChooserAction.SAVE,buttons=(Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.ACCEPT))
+        file_name = link[link.rfind("/")+1:] if fname is None else fname
+        dialog.set_current_name(file_name)
+        response = dialog.run()
+        if response == Gtk.ResponseType.ACCEPT:
+            download = Download(
+                url=self.api.get_real_download_link(link),
+                save_location=dialog.get_filename()
+            )
+            DownloadManager.download(download)
+            print("Downloading: \"{}\" to \"{}\"".format(link,dialog.get_filename()))
+            
+        dialog.destroy()
     
     @Gtk.Template.Callback("downloads_filter_changed")
     def downloads_filter_changed(self,widget):
@@ -342,7 +427,7 @@ class Details(Gtk.Viewport):
     def __on_download_selected(self,selection):
         model, treeiter = selection.get_selected()
         if treeiter is not None:
-            print("You selected", model[treeiter][6])
+            print("You selected", model[treeiter][7])
             
     def __on_goodie_selected(self,selection):
         model, treeiter = selection.get_selected()
@@ -366,7 +451,7 @@ class Details(Gtk.Viewport):
             tree.append_column(column)
             i += 1
     
-    def __append_to_list_store_for_download(self,store,item,download_type,is_goodie=False):
+    def __append_to_list_store_for_download(self,store,item,download_type,is_goodie=False,state: str=""):
         download_name = item["name"];
         download_language = None
         download_version = None
@@ -393,7 +478,7 @@ class Details(Gtk.Viewport):
                 else:
                     self.downloads_os.append(download_os)
                     os_image = self.__create_os_image(download_os)
-                    store.append([download_name,os_image,download_language,download_type,file_size,download_version,file["downlink"]])
+                    store.append([download_name,os_image,download_language,download_type,file_size,download_version,state,file["downlink"]])
         return links
     
     def __create_os_image(self,os: str) -> GdkPixbuf.Pixbuf:
