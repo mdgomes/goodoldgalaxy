@@ -1,36 +1,38 @@
 from setuptools import setup, find_packages
 from glob import glob
 import subprocess
-from minigalaxy.version import VERSION
+from goodoldgalaxy.version import VERSION
 
 # Generate the translations
 subprocess.run(['bash', 'scripts/compile-translations.sh'])
 
 setup(
-    name="minigalaxy",
+    name="goodoldgalaxy",
     version=VERSION,
     packages=find_packages(exclude=['tests']),
-    scripts=['bin/minigalaxy'],
+    scripts=['bin/goodoldgalaxy'],
 
     data_files=[
-        ('share/applications', ['data/io.github.sharkwouter.Minigalaxy.desktop']),
-        ('share/icons/hicolor/128x128/apps', ['data/icons/128x128/io.github.sharkwouter.Minigalaxy.png']),
-        ('share/icons/hicolor/192x192/apps', ['data/icons/192x192/io.github.sharkwouter.Minigalaxy.png']),
-        ('share/minigalaxy/ui', glob('data/ui/*.ui')),
-        ('share/minigalaxy/images', glob('data/images/*')),
-        ('share/metainfo', ['data/io.github.sharkwouter.Minigalaxy.metainfo.xml']),
+        ('share/applications', ['data/io.github.sharkwouter.goodoldgalaxy.desktop']),
+        ('share/icons/hicolor/128x128/apps', ['data/icons/128x128/io.github.sharkwouter.goodoldgalaxy.png']),
+        ('share/icons/hicolor/192x192/apps', ['data/icons/192x192/io.github.sharkwouter.goodoldgalaxy.png']),
+        ('share/goodoldgalaxy/ui', glob('data/ui/*.ui')),
+        ('share/goodoldgalaxy/images', glob('data/images/*')),
+        ('share/metainfo', ['data/io.github.sharkwouter.goodoldgalaxy.metainfo.xml']),
 
         # Add translations
-        ('share/minigalaxy/translations/de/LC_MESSAGES/', ['data/mo/de/LC_MESSAGES/minigalaxy.mo']),
-        ('share/minigalaxy/translations/fr/LC_MESSAGES/', ['data/mo/fr/LC_MESSAGES/minigalaxy.mo']),
-        ('share/minigalaxy/translations/nb_NO/LC_MESSAGES/', ['data/mo/nb_NO/LC_MESSAGES/minigalaxy.mo']),
-        ('share/minigalaxy/translations/nl/LC_MESSAGES/', ['data/mo/nl/LC_MESSAGES/minigalaxy.mo']),
-        ('share/minigalaxy/translations/nn_NO/LC_MESSAGES/', ['data/mo/nn_NO/LC_MESSAGES/minigalaxy.mo']),
-        ('share/minigalaxy/translations/pl/LC_MESSAGES/', ['data/mo/pl/LC_MESSAGES/minigalaxy.mo']),
-        ('share/minigalaxy/translations/pt_BR/LC_MESSAGES/', ['data/mo/pt_BR/LC_MESSAGES/minigalaxy.mo']),
-        ('share/minigalaxy/translations/ru_RU/LC_MESSAGES/', ['data/mo/ru_RU/LC_MESSAGES/minigalaxy.mo']),
-        ('share/minigalaxy/translations/tr/LC_MESSAGES/', ['data/mo/tr/LC_MESSAGES/minigalaxy.mo']),
-        ('share/minigalaxy/translations/zh_TW/LC_MESSAGES/', ['data/mo/zh_TW/LC_MESSAGES/minigalaxy.mo']),
+        ('share/goodoldgalaxy/translations/de/LC_MESSAGES/', ['data/mo/de/LC_MESSAGES/goodoldgalaxy.mo']),
+        ('share/goodoldgalaxy/translations/es/LC_MESSAGES/', ['data/mo/es/LC_MESSAGES/goodoldgalaxy.mo']),
+        ('share/goodoldgalaxy/translations/fr/LC_MESSAGES/', ['data/mo/fr/LC_MESSAGES/goodoldgalaxy.mo']),
+        ('share/goodoldgalaxy/translations/nb_NO/LC_MESSAGES/', ['data/mo/nb_NO/LC_MESSAGES/goodoldgalaxy.mo']),
+        ('share/goodoldgalaxy/translations/nl/LC_MESSAGES/', ['data/mo/nl/LC_MESSAGES/goodoldgalaxy.mo']),
+        ('share/goodoldgalaxy/translations/nn_NO/LC_MESSAGES/', ['data/mo/nn_NO/LC_MESSAGES/goodoldgalaxy.mo']),
+        ('share/goodoldgalaxy/translations/pl/LC_MESSAGES/', ['data/mo/pl/LC_MESSAGES/goodoldgalaxy.mo']),
+        ('share/goodoldgalaxy/translations/pt_BR/LC_MESSAGES/', ['data/mo/pt_BR/LC_MESSAGES/goodoldgalaxy.mo']),
+        ('share/goodoldgalaxy/translations/ru_RU/LC_MESSAGES/', ['data/mo/ru_RU/LC_MESSAGES/goodoldgalaxy.mo']),
+        ('share/goodoldgalaxy/translations/tr/LC_MESSAGES/', ['data/mo/tr/LC_MESSAGES/goodoldgalaxy.mo']),
+        ('share/goodoldgalaxy/translations/zh_CN/LC_MESSAGES/', ['data/mo/zh_CN/LC_MESSAGES/goodoldgalaxy.mo']),
+        ('share/goodoldgalaxy/translations/zh_TW/LC_MESSAGES/', ['data/mo/zh_TW/LC_MESSAGES/goodoldgalaxy.mo']),
     ],
 
     # Project uses reStructuredText, so ensure that the docutils get
@@ -45,11 +47,11 @@ setup(
     author_email="wwijsman@live.nl",
     description="A simple GOG Linux client",
     keywords="GOG gog client gaming gtk Gtk",
-    url="https://github.com/sharkwouter/minigalaxy",  # project home page, if any
+    url="https://github.com/sharkwouter/goodoldgalaxy",  # project home page, if any
     project_urls={
-        "Bug Tracker": "https://github.com/sharkwouter/minigalaxy/issues",
-        "Documentation": "https://github.com/sharkwouter/minigalaxy/blob/master/README.md",
-        "Source Code": "https://github.com/sharkwouter/minigalaxy",
+        "Bug Tracker": "https://github.com/sharkwouter/goodoldgalaxy/issues",
+        "Documentation": "https://github.com/sharkwouter/goodoldgalaxy/blob/master/README.md",
+        "Source Code": "https://github.com/sharkwouter/goodoldgalaxy",
     },
     classifiers=[
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",

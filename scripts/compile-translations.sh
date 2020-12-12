@@ -1,7 +1,7 @@
 #!/bin/bash
 cd "$(dirname "$0")"/../data/po
 
-OUTPUTFILE="minigalaxy.mo"
+OUTPUTFILE="goodoldgalaxy.mo"
 
 for langfile in *.po; do
 	

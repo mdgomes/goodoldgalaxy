@@ -1,5 +1,5 @@
 import unittest
-from minigalaxy.game import Game
+from goodoldgalaxy.game import Game
 
 
 class MyTestCase(unittest.TestCase):
@@ -17,22 +17,22 @@ class MyTestCase(unittest.TestCase):
     def test_local_and_api_comparison(self):
         larry1_api = Game("Leisure Suit Larry 1 - In the Land of the Lounge Lizards", game_id=1207662033)
         larry1_local_gog = Game("Leisure Suit Larry", install_dir="/home/user/Games/Leisure Suit Larry", game_id=1207662033)
-        larry1_local_minigalaxy = Game("Leisure Suit Larry", install_dir="/home/wouter/Games/Leisure Suit Larry 1 - In the Land of the Lounge Lizards", game_id=1207662033)
+        larry1_local_goodoldgalaxy = Game("Leisure Suit Larry", install_dir="/home/wouter/Games/Leisure Suit Larry 1 - In the Land of the Lounge Lizards", game_id=1207662033)
 
-        self.assertEqual(larry1_local_gog, larry1_local_minigalaxy)
-        self.assertEqual(larry1_local_minigalaxy, larry1_api)
+        self.assertEqual(larry1_local_gog, larry1_local_goodoldgalaxy)
+        self.assertEqual(larry1_local_goodoldgalaxy, larry1_api)
         self.assertEqual(larry1_local_gog, larry1_api)
 
         larry2_api = Game("Leisure Suit Larry 2 - Looking For Love (In Several Wrong Places)", game_id=1207662053)
-        larry2_local_minigalaxy = Game("Leisure Suit Larry 2", install_dir="/home/user/Games/Leisure Suit Larry 2 - Looking For Love (In Several Wrong Places)", game_id=1207662053)
+        larry2_local_goodoldgalaxy = Game("Leisure Suit Larry 2", install_dir="/home/user/Games/Leisure Suit Larry 2 - Looking For Love (In Several Wrong Places)", game_id=1207662053)
         larry2_local_gog = Game("Leisure Suit Larry 2", install_dir="/home/user/Games/Leisure Suit Larry 2", game_id=1207662053)
 
         self.assertNotEqual(larry1_api, larry2_api)
         self.assertNotEqual(larry2_local_gog, larry1_api)
         self.assertNotEqual(larry2_local_gog, larry1_local_gog)
-        self.assertNotEqual(larry2_local_gog, larry1_local_minigalaxy)
-        self.assertNotEqual(larry2_local_minigalaxy, larry1_api)
-        self.assertNotEqual(larry2_local_minigalaxy, larry1_local_minigalaxy)
+        self.assertNotEqual(larry2_local_gog, larry1_local_goodoldgalaxy)
+        self.assertNotEqual(larry2_local_goodoldgalaxy, larry1_api)
+        self.assertNotEqual(larry2_local_goodoldgalaxy, larry1_local_goodoldgalaxy)
 
     def test_local_comparison(self):
         larry1_local_gog = Game("Leisure Suit Larry", install_dir="/home/user/Games/Leisure Suit Larry", game_id=1207662033)

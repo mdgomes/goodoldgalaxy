@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-06 21:15+0200\n"
-"PO-Revision-Date: 2020-04-07 08:53+0800\n"
+"POT-Creation-Date: 2020-12-05 16:41+0100\n"
+"PO-Revision-Date: 2020-11-15 07:53+0800\n"
 "Last-Translator: Jeff Huang <s8321414@gmail.com>\n"
 "Language-Team: Chinese <zh-l10n@linux.org.tw>\n"
 "Language: zh_TW\n"
@@ -17,13 +17,13 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Lokalize 19.08.3\n"
 
-#. A short description of what Minigalaxy is
+#. A short description of what goodoldgalaxy is
 #: data/ui/about.ui:10
 msgctxt "short_description"
 msgid "A simple GOG client for Linux"
 msgstr "Linux 上簡單的 GOG 客戶端"
 
-#: minigalaxy/ui/about.py:15
+#: goodoldgalaxy/ui/about.py:15
 msgid "About"
 msgstr "關於"
 
@@ -33,16 +33,16 @@ msgctxt "about"
 msgid "About"
 msgstr "關於"
 
-#: minigalaxy/ui/gametile.py:114
+#: goodoldgalaxy/ui/gametile.py:125
 msgid "Are you sure you want to cancel downloading {}?"
 msgstr "您確定您想要取消下載 {} 嗎？"
 
-#: minigalaxy/ui/gametile.py:132
+#: goodoldgalaxy/ui/gametile.py:139
 #, python-format
 msgid "Are you sure you want to uninstall %s?"
 msgstr "您確定要解除安裝 %s 嗎？"
 
-#: minigalaxy/constants.py:8
+#: goodoldgalaxy/constants.py:8
 msgid "Brazilian Portuguese"
 msgstr "葡萄牙文（巴西）"
 
@@ -51,55 +51,59 @@ msgctxt "cancel"
 msgid "Cancel"
 msgstr "取消"
 
-#: minigalaxy/constants.py:9
+#: goodoldgalaxy/constants.py:9
 msgid "Chinese"
 msgstr "中文"
 
-#: minigalaxy/ui/library.py:150
+#: goodoldgalaxy/ui/library.py:149
 msgid "Couldn't connect to GOG servers"
 msgstr "無法連線至 GOG 伺服器"
 
-#: minigalaxy/ui/gametile.py:156
+#: goodoldgalaxy/ui/gametile.py:154
 msgid "Couldn't open support page"
 msgstr "無法開啟支援頁面"
 
-#: minigalaxy/launcher.py:45
-msgid "Couldn't start subprocess"
-msgstr "無法啟動子行程"
+#: data/ui/gametile.ui:108
+msgid "DLC"
+msgstr "DLC"
 
-#: minigalaxy/constants.py:10
+#: goodoldgalaxy/constants.py:10
 msgid "Danish"
 msgstr "丹麥文"
 
-#: minigalaxy/constants.py:11
+#: goodoldgalaxy/ui/gametile.py:215 goodoldgalaxy/ui/gametile.py:242
+msgid "Download error"
+msgstr "下載錯誤"
+
+#: goodoldgalaxy/constants.py:11
 msgid "Dutch"
 msgstr "荷蘭文"
 
-#: minigalaxy/constants.py:12
+#: goodoldgalaxy/constants.py:12
 msgid "English"
 msgstr "英文"
 
-#: minigalaxy/installer.py:79
+#: goodoldgalaxy/installer.py:86
 msgid "Failed to install {}"
 msgstr "安裝 {} 失敗"
 
-#: minigalaxy/ui/library.py:150
+#: goodoldgalaxy/ui/library.py:149
 msgid "Failed to retrieve library"
 msgstr "擷取收藏庫失敗"
 
-#: minigalaxy/launcher.py:59
+#: goodoldgalaxy/launcher.py:28 goodoldgalaxy/ui/gametile.py:121
 msgid "Failed to start {}:"
 msgstr "啟動 {} 失敗："
 
-#: minigalaxy/constants.py:13
+#: goodoldgalaxy/constants.py:13
 msgid "Finnish"
 msgstr "芬蘭文"
 
-#: minigalaxy/constants.py:14
+#: goodoldgalaxy/constants.py:14
 msgid "French"
 msgstr "法文"
 
-#: minigalaxy/constants.py:15
+#: goodoldgalaxy/constants.py:15
 msgid "German"
 msgstr "德文"
 
@@ -109,11 +113,11 @@ msgctxt "github_page_link"
 msgid "Github page"
 msgstr "GitHub 頁面"
 
-#: minigalaxy/constants.py:16
+#: goodoldgalaxy/constants.py:16
 msgid "Hungarian"
 msgstr "匈牙利文"
 
-#: minigalaxy/ui/preferences.py:47
+#: goodoldgalaxy/ui/preferences.py:47
 msgid "Install Wine to enable this feature"
 msgstr "安裝 Wine 以啟用此功能"
 
@@ -129,15 +133,15 @@ msgctxt "installed"
 msgid "Installed"
 msgstr "已安裝"
 
-#: minigalaxy/constants.py:17
+#: goodoldgalaxy/constants.py:17
 msgid "Italian"
 msgstr "義大利文"
 
-#: minigalaxy/constants.py:18
+#: goodoldgalaxy/constants.py:18
 msgid "Japanese"
 msgstr "日文"
 
-#: minigalaxy/ui/preferences.py:40
+#: goodoldgalaxy/ui/preferences.py:40
 msgid ""
 "Keep installers after downloading a game.\n"
 "Installers are stored in: {}"
@@ -151,11 +155,11 @@ msgctxt "keep_installer"
 msgid "Keep installers: "
 msgstr "保留安裝程式："
 
-#: minigalaxy/constants.py:19
+#: goodoldgalaxy/constants.py:19
 msgid "Korean"
 msgstr "韓文"
 
-#: minigalaxy/ui/login.py:23
+#: goodoldgalaxy/ui/login.py:23
 msgid "Login"
 msgstr "登入"
 
@@ -165,37 +169,33 @@ msgctxt "logout"
 msgid "Logout"
 msgstr "登出"
 
-#: minigalaxy/launcher.py:56
-msgid "No error message was returned"
-msgstr "未傳回錯誤訊息"
-
-#: minigalaxy/launcher.py:33
+#: goodoldgalaxy/launcher.py:156
 msgid "No executable was found in {}"
 msgstr "在 {} 找不到可執行檔"
 
-#: minigalaxy/constants.py:20
+#: goodoldgalaxy/constants.py:20
 msgid "Norwegian"
 msgstr "挪威文"
 
 #. Opens the directory the game is installed in
-#: data/ui/gametile.ui:45
+#: data/ui/gametile.ui:58
 msgctxt "open_files"
 msgid "Open Files"
 msgstr "開啟檔案"
 
-#: minigalaxy/ui/gametile.py:158
+#: goodoldgalaxy/ui/gametile.py:155
 msgid "Please check your internet connection"
 msgstr "請檢查您的網際網路連線"
 
-#: minigalaxy/constants.py:21
+#: goodoldgalaxy/constants.py:21
 msgid "Polish"
 msgstr "波蘭文"
 
-#: minigalaxy/constants.py:22
+#: goodoldgalaxy/constants.py:22
 msgid "Portuguese"
 msgstr "葡萄牙文"
 
-#: minigalaxy/ui/preferences.py:28
+#: goodoldgalaxy/ui/preferences.py:28
 msgid "Preferences"
 msgstr "偏好設定"
 
@@ -217,7 +217,7 @@ msgctxt "refresh"
 msgid "Refresh game list"
 msgstr "重新整理遊戲清單"
 
-#: minigalaxy/constants.py:23
+#: goodoldgalaxy/constants.py:23
 msgid "Russian"
 msgstr "俄文"
 
@@ -228,7 +228,7 @@ msgid "Save"
 msgstr "儲存"
 
 #. Open winecfg settings for Windows games
-#: data/ui/gametile.ui:59
+#: data/ui/gametile.ui:72
 msgctxt "Wine Settings"
 msgid "Settings"
 msgstr "設定"
@@ -258,108 +258,157 @@ msgid ""
 "graphics cards."
 msgstr "在遊玩遊戲時顯示畫面率。僅可與 AMD 及 Nvidia 的顯示卡一同運作。"
 
-#: minigalaxy/constants.py:24
+#: goodoldgalaxy/constants.py:24
 msgid "Spanish"
 msgstr "西班牙文"
 
-#. Whether the user will stay logged in after closing Minigalaxy. Ends with ": ".
+#. Whether the user will stay logged in after closing goodoldgalaxy. Ends with ": ".
 #: data/ui/preferences.ui:148
 msgctxt "stay_logged_in"
 msgid "Stay logged in:"
 msgstr "保持登入："
 
 #. Open store page
-#: data/ui/gametile.ui:17
+#: data/ui/gametile.ui:30
 msgctxt "store"
 msgid "Store Page"
 msgstr "商店頁面"
 
 #. Opens the official support webpage
-#: data/ui/gametile.ui:31
+#: data/ui/gametile.ui:44
 msgctxt "support"
 msgid "Support"
 msgstr "支援"
 
-#: minigalaxy/constants.py:25
+#: goodoldgalaxy/constants.py:25
 msgid "Swedish"
 msgstr "瑞典文"
+
+#: goodoldgalaxy/installer.py:61
+msgid "The installation of {} failed. Please try again."
+msgstr "{} 安裝失敗。請再試一次。"
 
 #: data/ui/preferences.ui:67
 msgctxt "preferred_language_tooltip"
 msgid "The preferred language for downloading games in"
 msgstr "下載遊戲的偏好語言"
 
+#: goodoldgalaxy/ui/gametile.py:216
+msgid ""
+"There was an error when trying to fetch the download link!\n"
+"{}"
+msgstr ""
+"嘗試擷取下載連結時發生錯誤！\n"
+"{}"
+
 #: data/ui/preferences.ui:92
 msgctxt "install_path_tooltip"
 msgid "This is where games will be installed"
 msgstr "遊戲會安裝在"
 
-#: minigalaxy/constants.py:26
+#: goodoldgalaxy/constants.py:26
 msgid "Turkish"
 msgstr "土耳其文"
 
 #. Removes the game files from the local machine
-#: data/ui/gametile.ui:73
+#: data/ui/gametile.ui:123
 msgctxt "uninstall"
 msgid "Uninstall"
 msgstr "解除安裝"
 
+#. Updates game
+#: data/ui/gametile.ui:86
+msgctxt "update"
+msgid "Update"
+msgstr "更新"
+
 #: data/ui/preferences.ui:145
 msgctxt "stay_logged_in_tooltip"
-msgid "When disabled you'll be asked to log in each time Minigalaxy is started"
-msgstr "若停用，您每次打開 Minigalaxy 時都會被要求登入"
+msgid "When disabled you'll be asked to log in each time goodoldgalaxy is started"
+msgstr "若停用，您每次打開 goodoldgalaxy 時都會被要求登入"
 
 #: data/ui/preferences.ui:198
 msgctxt "show_windows_games_tooltip"
 msgid "Whether Windows games are shown in the library or not"
 msgstr "Windows 遊戲是否要顯示在收藏庫中"
 
-#: minigalaxy/ui/gametile.py:277
+#: goodoldgalaxy/ui/gametile.py:451
 msgid "download"
 msgstr "下載"
 
-#: minigalaxy/ui/gametile.py:309
-msgid "downloading.."
-msgstr "正在下載……"
+#: goodoldgalaxy/ui/gametile.py:483
+msgid "downloading…"
+msgstr "正在下載…"
 
-#: minigalaxy/ui/gametile.py:301
-msgid "in queue.."
-msgstr "在佇列中……"
+#: goodoldgalaxy/ui/gametile.py:475
+msgid "in queue…"
+msgstr "在佇列中…"
 
-#: minigalaxy/ui/gametile.py:289
+#: goodoldgalaxy/ui/gametile.py:463
 msgid "install"
 msgstr "安裝"
 
-#: minigalaxy/ui/gametile.py:319
-msgid "installing.."
-msgstr "正在安裝……"
+#: goodoldgalaxy/ui/gametile.py:493
+msgid "installing…"
+msgstr "正在安裝…"
 
-#: minigalaxy/ui/gametile.py:333
+#: goodoldgalaxy/ui/gametile.py:507 goodoldgalaxy/ui/gametile.py:538
 msgid "play"
 msgstr "遊玩"
 
-#: minigalaxy/ui/gametile.py:348
-msgid "uninstalling.."
-msgstr "正在解除安裝……"
+#: goodoldgalaxy/ui/gametile.py:525
+msgid "uninstalling…"
+msgstr "正在解除安裝…"
 
-#: minigalaxy/installer.py:32 minigalaxy/installer.py:33
+#: goodoldgalaxy/ui/gametile.py:547
+msgid "updating…"
+msgstr "正在更新…"
+
+#: goodoldgalaxy/installer.py:33
 msgid "{} could not be unzipped."
 msgstr "無法解壓縮 {}。"
 
-#: minigalaxy/installer.py:14
+#: goodoldgalaxy/installer.py:14
 msgid "{} failed to download."
 msgstr "{} 下載失敗。"
 
-#: minigalaxy/ui/preferences.py:127
+#: goodoldgalaxy/ui/preferences.py:127
 msgid "{} isn't a usable path"
 msgstr "{} 不是可用的路徑"
 
-#: minigalaxy/installer.py:19
+#: goodoldgalaxy/installer.py:19
 msgid "{} was corrupted. Please download it again."
 msgstr "{} 已損毀。請再下載一次。"
 
-#~ msgid "Minigalaxy is now running in offline mode"
-#~ msgstr "Minigalaxy 目前以離線模式執行"
+#~ msgid ""
+#~ "<a href=\"https://github.com/ArturWroblewski\">Artur Wróblewski</a>\n"
+#~ "<a href=\"https://github.com/BlindJerobine\">BlindJerobine</a>\n"
+#~ "<a href=\"https://github.com/EsdrasTarsis\">Esdras Tarsis</a>\n"
+#~ "<a href=\"https://github.com/fuzunspm\">Hüseyin Fahri Uzun</a>\n"
+#~ "<a href=\"https://github.com/LordPilum\">Jan Kjetil Myklebust</a>\n"
+#~ "<a href=\"https://github.com/s8321414\">Jeff Huang</a>\n"
+#~ "<a href=\"https://github.com/kimmalmo\">kimmalmo</a>\n"
+#~ "<a href=\"https://github.com/protheory8\">ProTheory8</a>\n"
+#~ "<a href=\"https://github.com/thomasb22\">thomasb22</a>"
+#~ msgstr ""
+#~ "<a href=\"https://github.com/ArturWroblewski\">Artur Wróblewski</a>\n"
+#~ "<a href=\"https://github.com/BlindJerobine\">BlindJerobine</a>\n"
+#~ "<a href=\"https://github.com/EsdrasTarsis\">Esdras Tarsis</a>\n"
+#~ "<a href=\"https://github.com/fuzunspm\">Hüseyin Fahri Uzun</a>\n"
+#~ "<a href=\"https://github.com/LordPilum\">Jan Kjetil Myklebust</a>\n"
+#~ "<a href=\"https://github.com/s8321414\">Jeff Huang</a>\n"
+#~ "<a href=\"https://github.com/kimmalmo\">kimmalmo</a>\n"
+#~ "<a href=\"https://github.com/protheory8\">ProTheory8</a>\n"
+#~ "<a href=\"https://github.com/thomasb22\">thomasb22</a>"
+
+#~ msgid "Couldn't start subprocess"
+#~ msgstr "無法啟動子行程"
+
+#~ msgid "No error message was returned"
+#~ msgstr "未傳回錯誤訊息"
+
+#~ msgid "goodoldgalaxy is now running in offline mode"
+#~ msgstr "goodoldgalaxy 目前以離線模式執行"
 
 #~ msgid "Try again with an active internet connection"
 #~ msgstr "使用有效的網際網路連線重試"

@@ -1,4 +1,4 @@
-## Logo image (data/minigalaxy.png)
+## Logo image (data/goodoldgalaxy.png)
 
 **[Copyright 2014 Epic Runes](https://opengameart.org/users/epic-runes)**
 

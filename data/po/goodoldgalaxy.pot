@@ -1,0 +1,395 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-04-06 21:15+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. A short description of what goodoldgalaxy is
+#: data/ui/about.ui:10
+msgctxt "short_description"
+msgid "A simple GOG client for Linux"
+msgstr ""
+
+#: goodoldgalaxy/ui/about.py:15
+msgid "About"
+msgstr ""
+
+#. Opens about dialog
+#: data/ui/application.ui:58
+msgctxt "about"
+msgid "About"
+msgstr ""
+
+#: goodoldgalaxy/ui/gametile.py:114
+msgid "Are you sure you want to cancel downloading {}?"
+msgstr ""
+
+#: goodoldgalaxy/ui/gametile.py:132
+#, python-format
+msgid "Are you sure you want to uninstall %s?"
+msgstr ""
+
+#: goodoldgalaxy/constants.py:8
+msgid "Brazilian Portuguese"
+msgstr ""
+
+#: data/ui/preferences.ui:23
+msgctxt "cancel"
+msgid "Cancel"
+msgstr ""
+
+#: goodoldgalaxy/constants.py:9
+msgid "Chinese"
+msgstr ""
+
+#: goodoldgalaxy/ui/library.py:150
+msgid "Couldn't connect to GOG servers"
+msgstr ""
+
+#: goodoldgalaxy/ui/gametile.py:156
+msgid "Couldn't open support page"
+msgstr ""
+
+#: data/ui/gametile.ui:108
+msgid "DLC"
+msgstr ""
+
+#: goodoldgalaxy/launcher.py:45
+msgid "Couldn't start subprocess"
+msgstr ""
+
+#: goodoldgalaxy/constants.py:10
+msgid "Danish"
+msgstr ""
+
+#: goodoldgalaxy/ui/gametile.py:215 goodoldgalaxy/ui/gametile.py:242
+msgid "Download error"
+msgstr ""
+#: goodoldgalaxy/constants.py:11
+msgid "Dutch"
+msgstr ""
+
+#: goodoldgalaxy/constants.py:12
+msgid "English"
+msgstr ""
+
+#: goodoldgalaxy/installer.py:79
+msgid "Failed to install {}"
+msgstr ""
+
+#: goodoldgalaxy/ui/library.py:150
+msgid "Failed to retrieve library"
+msgstr ""
+
+#: goodoldgalaxy/launcher.py:59
+msgid "Failed to start {}:"
+msgstr ""
+
+#: goodoldgalaxy/constants.py:13
+msgid "Finnish"
+msgstr ""
+
+#: goodoldgalaxy/constants.py:14
+msgid "French"
+msgstr ""
+
+#: goodoldgalaxy/constants.py:15
+msgid "German"
+msgstr ""
+
+#. A link to the Github page
+#: data/ui/about.ui:12
+msgctxt "github_page_link"
+msgid "Github page"
+msgstr ""
+
+#: goodoldgalaxy/constants.py:16
+msgid "Hungarian"
+msgstr ""
+
+#: goodoldgalaxy/ui/preferences.py:47
+msgid "Install Wine to enable this feature"
+msgstr ""
+
+#. The place directory in which games are installed. Ends with ": ".
+#: data/ui/preferences.ui:95
+msgctxt "install_path"
+msgid "Installation path: "
+msgstr ""
+
+#. Used next to a checkbox which switches between showing all games and only installed ones
+#: data/ui/application.ui:115
+msgctxt "installed"
+msgid "Installed"
+msgstr ""
+
+#: goodoldgalaxy/constants.py:17
+msgid "Italian"
+msgstr ""
+
+#: goodoldgalaxy/constants.py:18
+msgid "Japanese"
+msgstr ""
+
+#: goodoldgalaxy/ui/preferences.py:40
+msgid ""
+"Keep installers after downloading a game.\n"
+"Installers are stored in: {}"
+msgstr ""
+
+#. Whether installer files are kept after download. Ends with ": ".
+#: data/ui/preferences.ui:122
+msgctxt "keep_installer"
+msgid "Keep installers: "
+msgstr ""
+
+#: goodoldgalaxy/constants.py:19
+msgid "Korean"
+msgstr ""
+
+#: goodoldgalaxy/ui/login.py:23
+msgid "Login"
+msgstr ""
+
+#. Logs the users gog account out and returns to login page
+#: data/ui/application.ui:17
+msgctxt "logout"
+msgid "Logout"
+msgstr ""
+
+#: goodoldgalaxy/launcher.py:56
+msgid "No error message was returned"
+msgstr ""
+
+#: goodoldgalaxy/launcher.py:33
+msgid "No executable was found in {}"
+msgstr ""
+
+#: goodoldgalaxy/constants.py:20
+msgid "Norwegian"
+msgstr ""
+
+#. Opens the directory the game is installed in
+#: data/ui/gametile.ui:45
+msgctxt "open_files"
+msgid "Open Files"
+msgstr ""
+
+#: goodoldgalaxy/ui/gametile.py:158
+msgid "Please check your internet connection"
+msgstr ""
+
+#: goodoldgalaxy/constants.py:21
+msgid "Polish"
+msgstr ""
+
+#: goodoldgalaxy/constants.py:22
+msgid "Portuguese"
+msgstr ""
+
+#: goodoldgalaxy/ui/preferences.py:28
+msgid "Preferences"
+msgstr ""
+
+#. Opens preferences dialog
+#: data/ui/application.ui:32
+msgctxt "preferences"
+msgid "Preferences"
+msgstr ""
+
+#. Prefered language to download games in. Ends with ": ".
+#: data/ui/preferences.ui:70
+msgctxt "preferred_language"
+msgid "Preferred language: "
+msgstr ""
+
+#. Tooltip for refresh button
+#: data/ui/application.ui:88
+msgctxt "refresh"
+msgid "Refresh game list"
+msgstr ""
+
+#: goodoldgalaxy/constants.py:23
+msgid "Russian"
+msgstr ""
+
+#. Saves the preferences
+#: data/ui/preferences.ui:37
+msgctxt "save"
+msgid "Save"
+msgstr ""
+
+#. Open winecfg settings for Windows games
+#: data/ui/gametile.ui:59
+msgctxt "Wine Settings"
+msgid "Settings"
+msgstr ""
+
+#. Has to end with ": "
+#: data/ui/preferences.ui:187
+msgctxt "show_fps"
+msgid "Show FPS in games:"
+msgstr ""
+
+#. Has to end with ": "
+#: data/ui/preferences.ui:201
+msgctxt "show_windows_games"
+msgid "Show Windows games: "
+msgstr ""
+
+#. Tooltip for the switch which allows only showing installed games or all games
+#: data/ui/application.ui:104
+msgctxt "tooltil_installed"
+msgid "Show only installed games"
+msgstr ""
+
+#: data/ui/preferences.ui:184
+msgctxt "show_fps_tooltip"
+msgid ""
+"Show the framerate while playing games. Only works with AMD and Nvidia "
+"graphics cards."
+msgstr ""
+
+#: goodoldgalaxy/constants.py:24
+msgid "Spanish"
+msgstr ""
+
+#. Whether the user will stay logged in after closing goodoldgalaxy. Ends with ": ".
+#: data/ui/preferences.ui:148
+msgctxt "stay_logged_in"
+msgid "Stay logged in:"
+msgstr ""
+
+#. Open store page
+#: data/ui/gametile.ui:17
+msgctxt "store"
+msgid "Store Page"
+msgstr ""
+
+#. Opens the official support webpage
+#: data/ui/gametile.ui:31
+msgctxt "support"
+msgid "Support"
+msgstr ""
+
+#: goodoldgalaxy/constants.py:25
+msgid "Swedish"
+msgstr ""
+
+#: goodoldgalaxy/installer.py:61
+msgid "The installation of {} failed. Please try again."
+msgstr ""
+
+#: data/ui/preferences.ui:67
+msgctxt "preferred_language_tooltip"
+msgid "The preferred language for downloading games in"
+msgstr ""
+
+#: goodoldgalaxy/ui/gametile.py:216
+msgid ""
+"There was an error when trying to fetch the download link!\n"
+"{}"
+msgstr ""
+
+#: data/ui/preferences.ui:92
+msgctxt "install_path_tooltip"
+msgid "This is where games will be installed"
+msgstr ""
+
+#: goodoldgalaxy/constants.py:26
+msgid "Turkish"
+msgstr ""
+
+#. Removes the game files from the local machine
+#: data/ui/gametile.ui:73
+msgctxt "uninstall"
+msgid "Uninstall"
+msgstr ""
+
+#. Updates game
+#: data/ui/gametile.ui:86
+msgctxt "update"
+msgid "Update"
+msgstr ""
+
+#: data/ui/preferences.ui:145
+msgctxt "stay_logged_in_tooltip"
+msgid "When disabled you'll be asked to log in each time goodoldgalaxy is started"
+msgstr ""
+
+#: data/ui/preferences.ui:198
+msgctxt "show_windows_games_tooltip"
+msgid "Whether Windows games are shown in the library or not"
+msgstr ""
+
+#: goodoldgalaxy/ui/gametile.py:277
+msgid "download"
+msgstr ""
+
+#: goodoldgalaxy/ui/gametile.py:309
+msgid "downloading.."
+msgstr ""
+
+#: goodoldgalaxy/ui/gametile.py:301
+msgid "in queue.."
+msgstr ""
+
+#: goodoldgalaxy/ui/gametile.py:301
+msgid "update in queue.."
+msgstr ""
+
+#: goodoldgalaxy/ui/gametile.py:289
+msgid "install"
+msgstr ""
+
+#: goodoldgalaxy/ui/gametile.py:319
+msgid "installing.."
+msgstr ""
+
+#: goodoldgalaxy/ui/gametile.py:333
+msgid "play"
+msgstr ""
+
+#: goodoldgalaxy/ui/gametile.py:333
+msgid "Download Update"
+msgstr ""
+
+msgid "Install Update"
+msgstr ""
+
+#: goodoldgalaxy/ui/gametile.py:348
+msgid "uninstalling.."
+msgstr ""
+
+#: goodoldgalaxy/ui/gametile.py:348
+msgid "updating.."
+msgstr ""
+
+#: goodoldgalaxy/installer.py:32 goodoldgalaxy/installer.py:33
+msgid "{} could not be unzipped."
+msgstr ""
+
+#: goodoldgalaxy/installer.py:14
+msgid "{} failed to download."
+msgstr ""
+
+#: goodoldgalaxy/ui/preferences.py:127
+msgid "{} isn't a usable path"
+msgstr ""
+
+#: goodoldgalaxy/installer.py:19
+msgid "{} was corrupted. Please download it again."
+msgstr ""

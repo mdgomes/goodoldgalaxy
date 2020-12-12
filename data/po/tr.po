@@ -7,24 +7,24 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-06 21:15+0200\n"
-"PO-Revision-Date: 2020-04-07 11:13+0300\n"
+"POT-Creation-Date: 2020-12-05 16:41+0100\n"
+"PO-Revision-Date: 2020-11-14 16:33+0300\n"
 "Last-Translator: Hüseyin Fahri Uzun <mail@fahriuzun.com>\n"
 "Language-Team: \n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.4.1\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#. A short description of what Minigalaxy is
+#. A short description of what goodoldgalaxy is
 #: data/ui/about.ui:10
 msgctxt "short_description"
 msgid "A simple GOG client for Linux"
 msgstr "Linux için basit bir GOG uygulaması"
 
-#: minigalaxy/ui/about.py:15
+#: goodoldgalaxy/ui/about.py:15
 msgid "About"
 msgstr "Hakkında"
 
@@ -34,16 +34,16 @@ msgctxt "about"
 msgid "About"
 msgstr "Hakkında"
 
-#: minigalaxy/ui/gametile.py:114
+#: goodoldgalaxy/ui/gametile.py:125
 msgid "Are you sure you want to cancel downloading {}?"
 msgstr "{} indirmesini iptal etmek istediğine emin misin?"
 
-#: minigalaxy/ui/gametile.py:132
+#: goodoldgalaxy/ui/gametile.py:139
 #, python-format
 msgid "Are you sure you want to uninstall %s?"
 msgstr "%s silmek istediğine emin misin?"
 
-#: minigalaxy/constants.py:8
+#: goodoldgalaxy/constants.py:8
 msgid "Brazilian Portuguese"
 msgstr "Brezilya Portekizçesi"
 
@@ -52,55 +52,59 @@ msgctxt "cancel"
 msgid "Cancel"
 msgstr "İptal"
 
-#: minigalaxy/constants.py:9
+#: goodoldgalaxy/constants.py:9
 msgid "Chinese"
 msgstr "Çince"
 
-#: minigalaxy/ui/library.py:150
+#: goodoldgalaxy/ui/library.py:149
 msgid "Couldn't connect to GOG servers"
 msgstr "GOG sunucularına bağlanılanamıyor"
 
-#: minigalaxy/ui/gametile.py:156
+#: goodoldgalaxy/ui/gametile.py:154
 msgid "Couldn't open support page"
 msgstr "Destek sayfası açılamadı"
 
-#: minigalaxy/launcher.py:45
-msgid "Couldn't start subprocess"
-msgstr "Alt işlem başlatılamadı"
+#: data/ui/gametile.ui:108
+msgid "DLC"
+msgstr "DLC"
 
-#: minigalaxy/constants.py:10
+#: goodoldgalaxy/constants.py:10
 msgid "Danish"
 msgstr "Danimarka Dili"
 
-#: minigalaxy/constants.py:11
+#: goodoldgalaxy/ui/gametile.py:215 goodoldgalaxy/ui/gametile.py:242
+msgid "Download error"
+msgstr "İndirme hatası"
+
+#: goodoldgalaxy/constants.py:11
 msgid "Dutch"
 msgstr "Flemenkçe"
 
-#: minigalaxy/constants.py:12
+#: goodoldgalaxy/constants.py:12
 msgid "English"
 msgstr "İngilzce"
 
-#: minigalaxy/installer.py:79
+#: goodoldgalaxy/installer.py:86
 msgid "Failed to install {}"
-msgstr "{} başlatılamadı:"
+msgstr "{} yüklenemedi:"
 
-#: minigalaxy/ui/library.py:150
+#: goodoldgalaxy/ui/library.py:149
 msgid "Failed to retrieve library"
 msgstr "Kütüphane alınamadı"
 
-#: minigalaxy/launcher.py:59
+#: goodoldgalaxy/launcher.py:28 goodoldgalaxy/ui/gametile.py:121
 msgid "Failed to start {}:"
 msgstr "{} başlatılamadı:"
 
-#: minigalaxy/constants.py:13
+#: goodoldgalaxy/constants.py:13
 msgid "Finnish"
 msgstr "Fince"
 
-#: minigalaxy/constants.py:14
+#: goodoldgalaxy/constants.py:14
 msgid "French"
 msgstr "Fransızca"
 
-#: minigalaxy/constants.py:15
+#: goodoldgalaxy/constants.py:15
 msgid "German"
 msgstr "Almanca"
 
@@ -110,11 +114,11 @@ msgctxt "github_page_link"
 msgid "Github page"
 msgstr "Github sayfası"
 
-#: minigalaxy/constants.py:16
+#: goodoldgalaxy/constants.py:16
 msgid "Hungarian"
 msgstr "Macarca"
 
-#: minigalaxy/ui/preferences.py:47
+#: goodoldgalaxy/ui/preferences.py:47
 msgid "Install Wine to enable this feature"
 msgstr "Bu özelliği etkinleştirmek için Wine yükleyin"
 
@@ -130,15 +134,15 @@ msgctxt "installed"
 msgid "Installed"
 msgstr "Yüklendi"
 
-#: minigalaxy/constants.py:17
+#: goodoldgalaxy/constants.py:17
 msgid "Italian"
 msgstr "İtalyanca"
 
-#: minigalaxy/constants.py:18
+#: goodoldgalaxy/constants.py:18
 msgid "Japanese"
 msgstr "Japonca"
 
-#: minigalaxy/ui/preferences.py:40
+#: goodoldgalaxy/ui/preferences.py:40
 msgid ""
 "Keep installers after downloading a game.\n"
 "Installers are stored in: {}"
@@ -152,11 +156,11 @@ msgctxt "keep_installer"
 msgid "Keep installers: "
 msgstr "Yükleyicileri saklı tut: "
 
-#: minigalaxy/constants.py:19
+#: goodoldgalaxy/constants.py:19
 msgid "Korean"
 msgstr "Korece"
 
-#: minigalaxy/ui/login.py:23
+#: goodoldgalaxy/ui/login.py:23
 msgid "Login"
 msgstr "Giriş Yap"
 
@@ -166,37 +170,33 @@ msgctxt "logout"
 msgid "Logout"
 msgstr "Çıkış Yap"
 
-#: minigalaxy/launcher.py:56
-msgid "No error message was returned"
-msgstr "Hata mesajı alınmadı"
-
-#: minigalaxy/launcher.py:33
+#: goodoldgalaxy/launcher.py:156
 msgid "No executable was found in {}"
 msgstr "{} burada başlatma dosyası bulunamadı"
 
-#: minigalaxy/constants.py:20
+#: goodoldgalaxy/constants.py:20
 msgid "Norwegian"
 msgstr "Norveçce"
 
 #. Opens the directory the game is installed in
-#: data/ui/gametile.ui:45
+#: data/ui/gametile.ui:58
 msgctxt "open_files"
 msgid "Open Files"
 msgstr "Dosyaları Aç"
 
-#: minigalaxy/ui/gametile.py:158
+#: goodoldgalaxy/ui/gametile.py:155
 msgid "Please check your internet connection"
 msgstr "Lütfen internet bağlantınızı kontrol ediniz"
 
-#: minigalaxy/constants.py:21
+#: goodoldgalaxy/constants.py:21
 msgid "Polish"
 msgstr "Lehçe"
 
-#: minigalaxy/constants.py:22
+#: goodoldgalaxy/constants.py:22
 msgid "Portuguese"
 msgstr "Portekizce"
 
-#: minigalaxy/ui/preferences.py:28
+#: goodoldgalaxy/ui/preferences.py:28
 msgid "Preferences"
 msgstr "Ayarlar"
 
@@ -218,7 +218,7 @@ msgctxt "refresh"
 msgid "Refresh game list"
 msgstr "Oyun listesini güncelle"
 
-#: minigalaxy/constants.py:23
+#: goodoldgalaxy/constants.py:23
 msgid "Russian"
 msgstr "Rusça"
 
@@ -229,7 +229,7 @@ msgid "Save"
 msgstr "Kaydet"
 
 #. Open winecfg settings for Windows games
-#: data/ui/gametile.ui:59
+#: data/ui/gametile.ui:72
 msgctxt "Wine Settings"
 msgid "Settings"
 msgstr "Ayarlar"
@@ -244,7 +244,7 @@ msgstr "Oyunlarda FPS göster:"
 #: data/ui/preferences.ui:201
 msgctxt "show_windows_games"
 msgid "Show Windows games: "
-msgstr "Oyunlarda FPS göster: "
+msgstr "Windows oyunlarını göster: "
 
 #. Tooltip for the switch which allows only showing installed games or all games
 #: data/ui/application.ui:104
@@ -261,108 +261,155 @@ msgstr ""
 "Oyun oynarken kare hızını göster. Sadece AMD ve Nvidia ekran kartlarında "
 "çalışır."
 
-#: minigalaxy/constants.py:24
+#: goodoldgalaxy/constants.py:24
 msgid "Spanish"
 msgstr "İspanyolca"
 
-#. Whether the user will stay logged in after closing Minigalaxy. Ends with ": ".
+#. Whether the user will stay logged in after closing goodoldgalaxy. Ends with ": ".
 #: data/ui/preferences.ui:148
 msgctxt "stay_logged_in"
 msgid "Stay logged in:"
 msgstr "Çevrimci tut:"
 
 #. Open store page
-#: data/ui/gametile.ui:17
+#: data/ui/gametile.ui:30
 msgctxt "store"
 msgid "Store Page"
 msgstr "Market Sayfası"
 
 #. Opens the official support webpage
-#: data/ui/gametile.ui:31
+#: data/ui/gametile.ui:44
 msgctxt "support"
 msgid "Support"
 msgstr "Destek"
 
-#: minigalaxy/constants.py:25
+#: goodoldgalaxy/constants.py:25
 msgid "Swedish"
 msgstr "İsveçce"
+
+#: goodoldgalaxy/installer.py:61
+msgid "The installation of {} failed. Please try again."
+msgstr "{} yüklemesi başarısız oldu. Lütfen bir daha deneyiniz."
 
 #: data/ui/preferences.ui:67
 msgctxt "preferred_language_tooltip"
 msgid "The preferred language for downloading games in"
 msgstr "İndirilen oyunlar için tercih edilen dil"
 
+#: goodoldgalaxy/ui/gametile.py:216
+msgid ""
+"There was an error when trying to fetch the download link!\n"
+"{}"
+msgstr "İndirme linki alınırken bir hata oluştu! {}"
+
 #: data/ui/preferences.ui:92
 msgctxt "install_path_tooltip"
 msgid "This is where games will be installed"
 msgstr "Burası oyunların indireleceği yerdir"
 
-#: minigalaxy/constants.py:26
+#: goodoldgalaxy/constants.py:26
 msgid "Turkish"
 msgstr "Türkçe"
 
 #. Removes the game files from the local machine
-#: data/ui/gametile.ui:73
+#: data/ui/gametile.ui:123
 msgctxt "uninstall"
 msgid "Uninstall"
 msgstr "Sil"
 
+#. Updates game
+#: data/ui/gametile.ui:86
+msgctxt "update"
+msgid "Update"
+msgstr "Güncelle"
+
 #: data/ui/preferences.ui:145
 msgctxt "stay_logged_in_tooltip"
-msgid "When disabled you'll be asked to log in each time Minigalaxy is started"
-msgstr "Etkin değilken her Minigalaxy açıldığında giriş yapılması istenir"
+msgid "When disabled you'll be asked to log in each time goodoldgalaxy is started"
+msgstr "Etkin değilken her goodoldgalaxy açıldığında giriş yapılması istenir"
 
 #: data/ui/preferences.ui:198
 msgctxt "show_windows_games_tooltip"
 msgid "Whether Windows games are shown in the library or not"
 msgstr "Windows oyunları kütüphanede gözükmeli mi"
 
-#: minigalaxy/ui/gametile.py:277
+#: goodoldgalaxy/ui/gametile.py:451
 msgid "download"
 msgstr "indir"
 
-#: minigalaxy/ui/gametile.py:309
-msgid "downloading.."
-msgstr "indirliyor.."
+#: goodoldgalaxy/ui/gametile.py:483
+msgid "downloading…"
+msgstr "indirliyor…"
 
-#: minigalaxy/ui/gametile.py:301
-msgid "in queue.."
-msgstr "sırada.."
+#: goodoldgalaxy/ui/gametile.py:475
+msgid "in queue…"
+msgstr "sırada…"
 
-#: minigalaxy/ui/gametile.py:289
+#: goodoldgalaxy/ui/gametile.py:463
 msgid "install"
 msgstr "yükle"
 
-#: minigalaxy/ui/gametile.py:319
-msgid "installing.."
-msgstr "yükleniyor.."
+#: goodoldgalaxy/ui/gametile.py:493
+msgid "installing…"
+msgstr "yükleniyor…"
 
-#: minigalaxy/ui/gametile.py:333
+#: goodoldgalaxy/ui/gametile.py:507 goodoldgalaxy/ui/gametile.py:538
 msgid "play"
 msgstr "oyna"
 
-#: minigalaxy/ui/gametile.py:348
-msgid "uninstalling.."
-msgstr "siliniyor.."
+#: goodoldgalaxy/ui/gametile.py:525
+msgid "uninstalling…"
+msgstr "siliniyor…"
 
-#: minigalaxy/installer.py:32 minigalaxy/installer.py:33
+#: goodoldgalaxy/ui/gametile.py:547
+msgid "updating…"
+msgstr "güncelleniyor…"
+
+#: goodoldgalaxy/installer.py:33
 msgid "{} could not be unzipped."
 msgstr "{} arşivden çıkartılamadı."
 
-#: minigalaxy/installer.py:14
+#: goodoldgalaxy/installer.py:14
 msgid "{} failed to download."
 msgstr "{} indirirken hata."
 
-#: minigalaxy/ui/preferences.py:127
+#: goodoldgalaxy/ui/preferences.py:127
 msgid "{} isn't a usable path"
 msgstr "{} kullanılabilinir bir yol değil"
 
-#: minigalaxy/installer.py:19
+#: goodoldgalaxy/installer.py:19
 msgid "{} was corrupted. Please download it again."
 msgstr "{} bozuk. Lütfen yeniden indirin."
 
-#~ msgid "Minigalaxy is now running in offline mode"
-#~ msgstr "Minigalaxy şuan çevrimdışı modunda çalışıyor"
+#~ msgid ""
+#~ "<a href=\"https://github.com/ArturWroblewski\">Artur Wróblewski</a>\n"
+#~ "<a href=\"https://github.com/BlindJerobine\">BlindJerobine</a>\n"
+#~ "<a href=\"https://github.com/EsdrasTarsis\">Esdras Tarsis</a>\n"
+#~ "<a href=\"https://github.com/fuzunspm\">Hüseyin Fahri Uzun</a>\n"
+#~ "<a href=\"https://github.com/LordPilum\">Jan Kjetil Myklebust</a>\n"
+#~ "<a href=\"https://github.com/s8321414\">Jeff Huang</a>\n"
+#~ "<a href=\"https://github.com/kimmalmo\">kimmalmo</a>\n"
+#~ "<a href=\"https://github.com/protheory8\">ProTheory8</a>\n"
+#~ "<a href=\"https://github.com/thomasb22\">thomasb22</a>"
+#~ msgstr ""
+#~ "<a href=\"https://github.com/ArturWroblewski\">Artur Wróblewski</a>\n"
+#~ "<a href=\"https://github.com/BlindJerobine\">BlindJerobine</a>\n"
+#~ "<a href=\"https://github.com/EsdrasTarsis\">Esdras Tarsis</a>\n"
+#~ "<a href=\"https://github.com/fuzunspm\">Hüseyin Fahri Uzun</a>\n"
+#~ "<a href=\"https://github.com/LordPilum\">Jan Kjetil Myklebust</a>\n"
+#~ "<a href=\"https://github.com/s8321414\">Jeff Huang</a>\n"
+#~ "<a href=\"https://github.com/kimmalmo\">kimmalmo</a>\n"
+#~ "<a href=\"https://github.com/protheory8\">ProTheory8</a>\n"
+#~ "<a href=\"https://github.com/thomasb22\">thomasb22</a>"
+
+#~ msgid "Couldn't start subprocess"
+#~ msgstr "Alt işlem başlatılamadı"
+
+#~ msgid "No error message was returned"
+#~ msgstr "Hata mesajı alınmadı"
+
+#~ msgid "goodoldgalaxy is now running in offline mode"
+#~ msgstr "goodoldgalaxy şuan çevrimdışı modunda çalışıyor"
 
 #~ msgid "Try again with an active internet connection"
 #~ msgstr "Aktif bir internet bağlantısı ile yeniden deneyiniz"

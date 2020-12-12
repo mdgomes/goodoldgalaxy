@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.36.0 -->
-<interface domain="minigalaxy">
+<interface domain="goodoldgalaxy">
   <requires lib="gtk+" version="3.20"/>
   <template class="InstalledRow" parent="GtkBox">
     <property name="visible">True</property>

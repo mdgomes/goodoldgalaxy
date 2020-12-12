@@ -1,12 +1,12 @@
 #!/usr/bin/make -f
 #export DH_VERBOSE = 1
 export PYBUILD_DISABLE=test
-export PYBUILD_NAME=minigalaxy
+export PYBUILD_NAME=goodoldgalaxy
 export PYBUILD_INSTALL_ARGS_python3=--install-scripts=/usr/games/
 
 %:
 	dh $@ --with python3 --buildsystem=pybuild
 
 override_dh_auto_build:
-	help2man -N -s 6 -n "a simple GTK based GOG Linux client" bin/minigalaxy > debian/minigalaxy.6
+	help2man -N -s 6 -n "a simple GTK based GOG Linux client" bin/goodoldgalaxy > debian/goodoldgalaxy.6
 	dh_auto_build

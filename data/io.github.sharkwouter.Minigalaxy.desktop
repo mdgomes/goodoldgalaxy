@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=Minigalaxy
-GenericName=GOG client
-Comment=A simple GOG Linux client
-Exec=minigalaxy
-Icon=io.github.sharkwouter.Minigalaxy
-Type=Application
-Keywords=galaxy,gaming,games,game,old,good
-Categories=Game

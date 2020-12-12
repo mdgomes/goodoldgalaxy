@@ -1,3 +1,35 @@
+**1.1.0**
+- Add the following translations:
+    - Swedish (thanks to Newbytee)
+
+**1.0.0**
+- Games can now be updated (thanks to mdgomes and makson96)
+- DLC can now be installed and updated (thanks to makson96)
+- The installed filter now also shows games which are downloading (thanks to makson96)
+- Fix crash on some systems where /usr/bin is linked to /bin (thanks to sgn)
+- Create new config file if old one is unreadable (thanks to SvdB-nonp)
+- Fix some Windows games not installing because of the directory name used (thanks to SvdB-nonp)
+- Fix some Windows games like Witcher 3 not launching because of the working directory not being set (thanks for kibun1)
+- Clean up installation files for cancelled downloads (thanks to SvdB-nonp)
+- Fix crash on flaky internet connection (thanks to makson96)
+- Use 755 permissions for all directories created by goodoldgalaxy
+- Remove cached files when cancelling a download (thanks to svdB-nonp)
+- Installed games should no longer be shown twice (thanks to makson96)
+
+- Add the following translations:
+    - Simplified Chinese (thanks to dummyx)
+    - Spanish (thanks to juanborda)
+
+- Update the following translations:
+    - Brazilian Portuguese (thanks to EsdrasTarsis)
+    - Dutch
+    - French (thanks to Thomasb22)
+    - German (thanks to BlindJerobine)
+    - Norwegian Bokmål (thanks to kimmalmo)
+    - Russian (thanks to protheory8)
+    - Taiwanese Mandarin (thanks to s8321414)
+    - Turkish (thanks to fuzunspm)
+
 **0.9.4**
 - Added the following translations:
     - Norwegian Nynorsk (thanks to LordPilum)
@@ -33,7 +65,7 @@
 - Added option to display FPS in games (thanks to Odelpasso).
 - Downloads can now be resumed after having been cancelled before.
 - Installers are now verified before installing.
-- The active download is now resumed when restarting Minigalaxy.
+- The active download is now resumed when restarting goodoldgalaxy.
 - Fixed issue with games not downloading.
 
 **0.9.2**

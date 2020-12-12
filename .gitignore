@@ -14,12 +14,12 @@ data/po/*.mo
 # Files generated when building the deb package
 .pybuild/
 build/
-debian/minigalaxy.6
+debian/goodoldgalaxy.6
 debian/files
 debian/.debhelper/
 debian/debhelper-build-stamp
-debian/minigalaxy/
-debian/minigalaxy.substvars
-debian/minigalaxy.debhelper.log
-debian/minigalaxy.postinst.debhelper
-debian/minigalaxy.prerm.debhelper
+debian/goodoldgalaxy/
+debian/goodoldgalaxy.substvars
+debian/goodoldgalaxy.debhelper.log
+debian/goodoldgalaxy.postinst.debhelper
+debian/goodoldgalaxy.prerm.debhelper
