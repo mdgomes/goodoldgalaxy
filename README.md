@@ -4,6 +4,10 @@ A simple GOG client for Linux forked from [Minigalaxy](https://github.com/sharkw
 
 ![screenshot](screenshot.jpg?raw=true)
 
+![screenshot-grid](screenshot-grid.jpg?raw=true)
+
+![screenshot-details](screenshot-details.jpg?raw=true)
+
 ## Features
 
 The most important features of Good Old Galaxy:
