@@ -23,6 +23,7 @@ class Library(Gtk.Viewport):
     menu_genre = Gtk.Template.Child()
     menu_system = Gtk.Template.Child()
     menu_tags = Gtk.Template.Child()
+    menu_state = Gtk.Template.Child()
     library_window = Gtk.Template.Child()
     library_viewport = Gtk.Template.Child()
     image_view_as_list = Gtk.Template.Child()
@@ -35,6 +36,10 @@ class Library(Gtk.Viewport):
     ck_os_linux = Gtk.Template.Child()
     ck_os_windows = Gtk.Template.Child()
     ck_os_mac = Gtk.Template.Child()
+    statesbox = Gtk.Template.Child()
+    ck_state_installed = Gtk.Template.Child()
+    ck_state_updated = Gtk.Template.Child()
+    ck_state_hidden = Gtk.Template.Child()
 
     def __init__(self, parent, library: Library, api: Api):
         Gtk.Viewport.__init__(self)
@@ -110,8 +115,9 @@ class Library(Gtk.Viewport):
         genres = self.__get_selected_genres()
         tags = self.__get_selected_tags()
         name = self.library_search.get_text().strip()
+        states = self.__get_selected_states()
         # fetch from library
-        return self.library.get_filtered_games(installed, platforms, genres, tags, name)
+        return self.library.get_filtered_games(installed, platforms, genres, tags, states, name)
         
     def __update_popovers(self):
         # handle genres
@@ -236,6 +242,16 @@ class Library(Gtk.Viewport):
             if child.get_active():
                 tags.append(child.get_label())
         return tags if len(tags) > 0 else None
+    
+    def __get_selected_states(self) -> List[str]:
+        states = []
+        if self.ck_state_installed.get_active():
+            states.append("installed")
+        if self.ck_state_updated.get_active():
+            states.append("updated")
+        if self.ck_state_hidden.get_active():
+            states.append("hidden")
+        return states if len(states) > 0 else None
 
     def __filter_library_func(self, child):
         tile = child.get_children()[0]
@@ -244,8 +260,9 @@ class Library(Gtk.Viewport):
         platforms = self.__get_selected_platforms()
         genres = self.__get_selected_genres()
         tags = self.__get_selected_tags()
+        states = self.__get_selected_states()
         name = self.library_search.get_text().strip()
-        return self.library.is_game_filtered(tile.game, installed=installed, platform=platforms, genre=genres, tag=tags, name=name)
+        return self.library.is_game_filtered(tile.game, installed=installed, platform=platforms, genre=genres, tag=tags, state=states, name=name)
 
     def sort_library(self):
         if self.library_mode == "list":

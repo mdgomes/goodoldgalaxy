@@ -50,13 +50,14 @@ class InstalledRow(Gtk.Box):
         image_url = "https:{}".format(self.game.sidebar_icon_url)
         icon = os.path.join(self.game.cache_dir, "{}_sbicon.png".format(self.game.id))
 
-        download = Download(image_url, icon, finish_func=self.__set_image)
+        download = Download(image_url, icon)
+        download.register_finish_function(self.__set_image)
         DownloadManager.download_now(download)
         return True
 
     def __set_image(self):
         icon = os.path.join(self.game.cache_dir, "{}_sbicon.png".format(self.game.id))
-        if os.path.isfile(icon) and os.path.exists(icon):
+        if os.path.isfile(icon) and os.path.exists(icon) and os.path.getsize(icon) > 0:
             GLib.idle_add(self.image.set_from_file, icon)
             return True
         return False
@@ -71,8 +72,8 @@ class InstalledRow(Gtk.Box):
 
     def __create_progress_bar(self) -> None:
         self.progress_bar = Gtk.ProgressBar()
-        self.progress_bar.set_halign(Gtk.Align.CENTER)
-        self.progress_bar.set_size_request(self.get_allocated_width(), -1)
+        self.progress_bar.set_halign(Gtk.Align.FILL)
+        self.progress_bar.set_size_request(-1, -1)
         self.progress_bar.set_hexpand(True)
         self.progress_bar.set_vexpand(False)
         self.set_center_widget(self.progress_bar)
@@ -96,7 +97,8 @@ class InstalledRow(Gtk.Box):
 
     def update_options(self):
         # special cases 
-        if self.game.updates is not None and self.game.updates > 0:
+        self.update_icon.hide()
+        if self.game.installed == 1 and self.game.updates is not None and self.game.updates > 0:
             self.update_icon.set_from_icon_name("gtk-refresh",4)
             self.update_icon.show()
         else:
@@ -105,6 +107,7 @@ class InstalledRow(Gtk.Box):
     def reload_state(self):
         dont_act_in_states = [self.game.state.QUEUED, self.game.state.DOWNLOADING, self.game.state.INSTALLING, self.game.state.UNINSTALLING, self.game.state.UPDATING, self.game.state.UPDATE_QUEUED, self.game.state.UPDATE_DOWNLOADING]
         if self.current_state in dont_act_in_states:
+            self.image.set_sensitive(True)
             return
         if self.game.install_dir and os.path.exists(self.game.install_dir):
             self.update_to_state(self.game.state.INSTALLED)

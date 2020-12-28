@@ -22,6 +22,8 @@ class Preferences(Gtk.Dialog):
     switch_show_fps = Gtk.Template.Child()
     switch_show_windows_games = Gtk.Template.Child()
     switch_create_shortcuts = Gtk.Template.Child()
+    switch_install_dlcs = Gtk.Template.Child()
+    switch_automatic_updates = Gtk.Template.Child()
     button_cancel = Gtk.Template.Child()
     button_save = Gtk.Template.Child()
 
@@ -35,6 +37,8 @@ class Preferences(Gtk.Dialog):
         self.switch_show_fps.set_active(Config.get("show_fps"))
         self.switch_show_windows_games.set_active(Config.get("show_windows_games"))
         self.switch_create_shortcuts.set_active(Config.get("create_shortcuts"))
+        self.switch_install_dlcs.set_active(Config.get("install_dlcs"))
+        self.switch_automatic_updates.set_active(Config.get("automatic_updates"))
 
         # Set tooltip for keep installers label
         installer_dir = os.path.join(self.button_file_chooser.get_filename(), "installer")
@@ -110,6 +114,8 @@ class Preferences(Gtk.Dialog):
         Config.set("stay_logged_in", self.switch_stay_logged_in.get_active())
         Config.set("show_fps", self.switch_show_fps.get_active())
         Config.set("create_shortcuts", self.switch_create_shortcuts.get_active())
+        Config.set("install_dlcs", self.switch_install_dlcs.get_active())
+        Config.set("automatic_updates", self.switch_automatic_updates.get_active())
 
         if self.switch_show_windows_games.get_active() != Config.get("show_windows_games"):
             Config.set("show_windows_games", self.switch_show_windows_games.get_active())

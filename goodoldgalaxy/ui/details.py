@@ -17,14 +17,18 @@ from goodoldgalaxy.launcher import start_game, config_game
 from goodoldgalaxy.css import CSS_PROVIDER
 from goodoldgalaxy.download import Download
 from goodoldgalaxy.download_manager import DownloadManager
-from goodoldgalaxy.constants import IETF_DOWNLOAD_LANGUAGES, DL_TYPES, BONUS_TYPES
+from goodoldgalaxy.constants import IETF_DOWNLOAD_LANGUAGES, DL_TYPES, BONUS_TYPES, DOWNLOAD_LANGUAGES_TO_GOG_CODE
 from goodoldgalaxy.ui.achievementrow import AchievementRow
+from goodoldgalaxy.installer import install_game
+from zipfile import BadZipFile
 
 @Gtk.Template.from_file(os.path.join(UI_DIR, "details.ui"))
 class Details(Gtk.Viewport):
     __gtype_name__ = "Details"
+    gogBaseUrl = "https://www.gog.com"
     
     basebox = Gtk.Template.Child()
+    background_viewport = Gtk.Template.Child()
     background_image = Gtk.Template.Child()
     notebook = Gtk.Template.Child()
     changelog = Gtk.Template.Child()
@@ -212,8 +216,8 @@ class Details(Gtk.Viewport):
         # downloads
         didx=0
         gidx=0
-        downloads_store = Gtk.ListStore(str,GdkPixbuf.Pixbuf,str,str,str,str,str,str)
-        downloads_cols = [_("Name"),_("OS"),_("Language"),_("Type"),_("Size"),_("Version"),_("State"),_("Location")]
+        downloads_store = Gtk.ListStore(str,GdkPixbuf.Pixbuf,str,str,str,str,str,str,int,int,str)
+        downloads_cols = [_("Name"),_("OS"),_("Language"),_("Type"),_("Size"),_("Version"),_("State"),"Location","Id","File Size","Operating System"]
         goodies_store = Gtk.ListStore(str,str,str,str,str,str)
         goodies_cols = [_("Name"),_("Category"),_("Type"),_("Size"),_("Count"),_("Location")]
         self.downloads_languages = set()
@@ -240,7 +244,7 @@ class Details(Gtk.Viewport):
                                 state = _("Installed")
                             else:
                                 state = _("Update Available")
-                        links = self.__append_to_list_store_for_download(downloads_store,item,download_type,state=state)
+                        links = self.__append_to_list_store_for_download(downloads_store,item,download_type,state=state,product_id=self.game.id, file_size=item["total_size"])
                         for link in links:
                             self.download_links.append(link)
         if "expanded_dlcs" in self.response:
@@ -259,14 +263,16 @@ class Details(Gtk.Viewport):
                                 self.goodies_links.append(link)
                         else:
                             didx += 1
-                            state = self.game.get_dlc_status(item["name"],item["version"])
+                            state = self.game.get_dlc_status(item["name"],item["version"]) if self.game.installed > 0 else "N/A"
                             if state == "installed":
                                 state = _("Installed")
                             elif state == "updatable":
                                 state = _("Update Available")
                             elif state == "not-installed":
                                 state = _("Install")
-                            links = self.__append_to_list_store_for_download(downloads_store,item,"DLC "+download_type,state=state)
+                            links = self.__append_to_list_store_for_download(downloads_store,item,"DLC "+download_type,state=state,product_id=dlc["id"], file_size=item["total_size"])
+                            # add game to dlc list
+                            self.game.add_dlc_from_json(dlc)
                             for link in links:
                                 self.download_links.append(link)
         if (didx > 0):
@@ -305,6 +311,9 @@ class Details(Gtk.Viewport):
         for achievement in achievements:
             arow = AchievementRow(self,achievement)
             GLib.idle_add(self.achievements_box.add,arow)
+        if len(achievements) == 0:
+            # hide tab
+            self.notebook.remove_page(2)
 
     def __get_download_platforms(self):
         platforms = []
@@ -344,24 +353,28 @@ class Details(Gtk.Viewport):
             link = None
             fname = None
             ftype = None
+            fsize = -1
             if res is not None:
                 path = res[0]
                 treeiter:Gtk.TreeIter = self.downloadstree.get_model().get_iter(path)
                 fname = self.downloadstree.get_model().get_value(treeiter,0)
-                ftype = self.downloadstree.get_model().get_value(treeiter,2)
+                ftype = self.downloadstree.get_model().get_value(treeiter,3)
                 state = self.downloadstree.get_model().get_value(treeiter,6)
                 link = self.downloadstree.get_model().get_value(treeiter,7)
+                pid = self.downloadstree.get_model().get_value(treeiter,8)
+                fsize = self.downloadstree.get_model().get_value(treeiter,9)
             # find out what was selected
             menu:Gtk.Menu = Gtk.Menu ()
             if state == _("Update Available"):
                 update_item:Gtk.MenuItem = Gtk.MenuItem.new_with_label(_("Update"))
                 menu.add(update_item)
-            if state == _("Update Available") or state == _("Installed"):
+            if ftype == _("Installer") and (state == _("Update Available") or state == _("Installed")):
                 uninstall_item:Gtk.MenuItem = Gtk.MenuItem.new_with_label(_("Uninstall"))
+                uninstall_item.connect("activate",self.on_menu_button_uninstall)
                 menu.add(uninstall_item)
-            if state == None or state == _("N/A") or state == "":
+            if (ftype == _("Installer") or (ftype != _("Installer") and self.game.installed == 1)) and (state == None or state == _("N/A") or state == "" or state == "Install"):
                 install_item:Gtk.MenuItem = Gtk.MenuItem.new_with_label(_("Install"))
-                install_item.connect("active",self.__install_file,link,ftype)
+                install_item.connect("activate",self.__install_file,link,ftype,pid,fsize,treeiter)
                 menu.add(install_item)
             download_item:Gtk.MenuItem = Gtk.MenuItem.new_with_label(_("Download"))
             download_item.connect("activate",self.__download_file,link,fname)
@@ -393,18 +406,81 @@ class Details(Gtk.Viewport):
             menu.popup(None, None, None, None, event.button, event.time)                
         return False
     
-    def __install_file(self,widget,link:str,ftype:str = None):
+    def __install_file(self,widget,link:str,ftype:str = None,product_id: int = None, fsize: int = 0, treeiter:Gtk.TreeIter = None):
         if (ftype == _("Installer")):
             # just follow the default path
             self.parent.download_game(self.game)
         elif ftype == "DLC "+_("Installer"):
+            dlc = None
+            if product_id is not None:
+                for i in self.game.dlcs:
+                    if i.id == product_id:
+                        dlc = i
+                        break
             
-            download = Download(
-                url=self.api.get_real_download_link(link),
-                save_location=self.game.download_path
-            )
+            if dlc is not None:
+                dlc.platform = self.downloadstree.get_model().get_value(treeiter,10)
+                dlc.language = DOWNLOAD_LANGUAGES_TO_GOG_CODE[self.downloadstree.get_model().get_value(treeiter,2)]
+                dlc.available_version = self.downloadstree.get_model().get_value(treeiter,5) 
+                download = Download(
+                    url=self.api.get_real_download_link(link),
+                    save_location=dlc.download_path,
+                    title=dlc.name,
+                    associated_object=dlc,
+                    file_size=fsize
+                )
+            else:
+                # fallback to game as source of generic information
+                download = Download(
+                    url=self.api.get_real_download_link(link),
+                    save_location=self.game.download_path,
+                    title=self.game.name,
+                    associated_object=self.game,
+                    file_size=fsize
+                )
+            download.register_finish_function(self.__finish_download,[treeiter,dlc])
+            download.register_state_function(self.__state_func,treeiter)
             DownloadManager.download(download)
-            print("Downloading: \"{}\"".format(link))
+        print("Downloading: \"{}\"".format(link))
+
+    def __state_func(self, state, treeiter:Gtk.TreeIter = None):
+        if treeiter is None:
+            return
+        val = self.downloadstree.get_model().get_value(treeiter,6)
+        if state == state.DOWNLOADING:
+            val = _("Downloading")
+        elif state == state.QUEUED:
+            val = _("Queued")
+        elif state == state.PAUSED:
+            val = _("Paused")
+        elif state == state.FINISHED:
+            val = _("Installable")
+        elif state == state.ERROR or state == state.CANCELED:
+            val = _("Install")
+        
+        self.downloadstree.get_model().set_value(treeiter,6,val)
+
+    def __finish_download(self, args):
+        treeiter:Gtk.TreeIter = args[0] if len(args) > 0 else None
+        dlc = args[1] if len(args) > 1 else None
+        if treeiter is None or dlc is None:
+            self.downloadstree.get_model().set_value(treeiter,6,_("Installable"))
+            return
+        self.downloadstree.get_model().set_value(treeiter,6,_("Installing"))
+        if dlc is not None:
+            # install DLC
+            try:
+                if os.path.exists(dlc.keep_path):
+                    install_game(dlc, dlc.keep_path, main_window=self.parent)
+                else:
+                    install_game(dlc, dlc.download_path, main_window=self.parent)
+            except (FileNotFoundError, BadZipFile):
+                # error, revert state
+                self.downloadstree.get_model().set_value(treeiter,6,_("Installable"))
+                return
+            # No error, install was successful, as such update information
+            self.game.set_dlc_status(dlc.name, "installed" , dlc.available_version)
+            self.downloadstree.get_model().set_value(treeiter,6,_("Installed"))
 
     def __download_file(self,widget,link:str,fname:str = None):
         dialog:Gtk.FileChooserDialog = Gtk.FileChooserDialog(_("Download"),self.parent,action=Gtk.FileChooserAction.SAVE,buttons=(Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.ACCEPT))
@@ -437,7 +513,7 @@ class Details(Gtk.Viewport):
 
     def __create_tree_columns(self,tree,columns,is_goodies=False):
         i = 0
-        last = len(columns) - 1
+        last = len(columns) - 4
         for column_title in columns:
             renderer = None
             column = None
@@ -447,12 +523,12 @@ class Details(Gtk.Viewport):
             else:
                 renderer = Gtk.CellRendererText()
                 column = Gtk.TreeViewColumn(column_title, renderer, text=i)
-            if i == last:
+            if i >= last:
                 column.set_visible(False)
             tree.append_column(column)
             i += 1
     
-    def __append_to_list_store_for_download(self,store,item,download_type,is_goodie=False,state: str=""):
+    def __append_to_list_store_for_download(self,store,item,download_type,is_goodie=False,state: str="", product_id: int = None, file_size: int = None):
         download_name = item["name"];
         download_language = None
         download_version = None
@@ -479,7 +555,7 @@ class Details(Gtk.Viewport):
                 else:
                     self.downloads_os.append(download_os)
                     os_image = self.__create_os_image(download_os)
-                    store.append([download_name,os_image,download_language,download_type,file_size,download_version,state,file["downlink"]])
+                    store.append([download_name,os_image,download_language,download_type,file_size,download_version,state,file["downlink"],product_id,file["size"],item["os"]])
         return links
     
     def __create_os_image(self,os: str) -> GdkPixbuf.Pixbuf:
@@ -504,7 +580,8 @@ class Details(Gtk.Viewport):
         # Download the thumbnail
         img = os.path.join(self.game.cache_dir, "video_{}.jpg".format(vidx))
 
-        download = Download(thumbnail_url, img, finish_func=self.__set_video, finish_func_args=(vidx,video_url))
+        download = Download(thumbnail_url, img)
+        download.register_finish_function(self.__set_video,(vidx,video_url))
         DownloadManager.download_now(download)
         return True
     
@@ -512,7 +589,11 @@ class Details(Gtk.Viewport):
         img = os.path.join(self.game.cache_dir, "video_{}.jpg".format(vidx))
         if os.path.isfile(img) and os.path.exists(img):
             btn = Gtk.LinkButton(video_url)
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(img,-1,110,True)
+            try:
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(img,-1,110,True)
+            except Exception as ex:
+                print("Could not process pixbuf for video_{}. Cause: {}".format(vidx,ex))
+                return False
             tile = Gtk.Image().new_from_pixbuf(pixbuf)
             tile.show()
             btn.add(tile)
@@ -528,7 +609,8 @@ class Details(Gtk.Viewport):
         # Download the thumbnail
         img = os.path.join(self.game.cache_dir, "screenshot_{}_ggvgt_2x.jpg".format(image_id))
 
-        download = Download(image_url, img, finish_func=self.__set_screenshot, finish_func_args=image_id)
+        download = Download(image_url, img)
+        download.register_finish_function(self.__set_screenshot,image_id)
         DownloadManager.download_now(download)
         return True
     
@@ -561,25 +643,39 @@ class Details(Gtk.Viewport):
         image_url = "https:{}".format(self.game.background_url)
         img = os.path.join(self.game.cache_dir, "{}_background.jpg".format(self.game.id))
 
-        download = Download(image_url, img, finish_func=self.__set_background_image)
+        download = Download(image_url, img)
+        download.register_finish_function(self.__set_background_image)
         DownloadManager.download_now(download)
         return True
     
     def __set_background_image(self):
-        img = os.path.join(self.game.cache_dir, "{}_background.jpg".format(self.game.id))
-        if os.path.isfile(img) and os.path.exists(img):
-            # minimum height 220
-            width = self.basebox.get_allocation().width
-            if (width < 640):
-                width = 640
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(img,width,-1,True)
-            GLib.idle_add(self.background_image.set_from_pixbuf, pixbuf)
+        # minimum height 220
+        width = self.parent.selection_window.get_allocation().width - 30
+        if (width < 640):
+            width = 640
+        if self.background_image.get_pixbuf() is None:
+            img = os.path.join(self.game.cache_dir, "{}_background.jpg".format(self.game.id))
+            if os.path.isfile(img) and os.path.exists(img):
+                try:
+                    pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(img,width,-1,True)
+                    GLib.idle_add(self.background_image.set_from_pixbuf, pixbuf)
+                except Exception as ex:
+                    print("Could not format background image. Cause: {}".format(ex))            
+                return True
+        else:
+            pixbuf = self.background_image.get_pixbuf()
+            try:
+                pixbuf.scale_simple(width,-1,GdkPixbuf.InterpType.BILINEAR)
+                self.background_image.set_from_pixbuf(pixbuf)
+            except Exception as ex:
+                print("Could not scale background image. Cause: {}".format(ex))            
             return True
         return False
     
     @Gtk.Template.Callback("on_box_resize")
     def on_box_resize(self,container):
         self.__set_background_image()
+        return
 
     @Gtk.Template.Callback("on_button_clicked")
     def on_button_click(self, widget) -> None:
@@ -605,7 +701,17 @@ class Details(Gtk.Viewport):
 
     @Gtk.Template.Callback("on_menu_button_uninstall_clicked")
     def on_menu_button_uninstall(self, widget):
-        self.parent.uninstall_game(self.game)
+        if not self.parent.uninstall_game(self.game):
+            return
+        # user clicked on OK
+        self.update_options()
+        # reset status for downloads table
+        for row in self.downloadstree.get_model():
+            if row[3] == _("Installer"):
+                row[6] = _("Install")
+            else:
+                row[6] = _("N/A")
+            
 
     @Gtk.Template.Callback("on_menu_button_open_clicked")
     def on_menu_button_open_files(self, widget):
@@ -660,6 +766,7 @@ class Details(Gtk.Viewport):
             self.menu_button_open.show()
         elif (self.current_state == self.game.state.DOWNLOADABLE):
             self.button.set_label(_("download"))
+            self.installed_version_label.set_text("")
         elif (self.current_state == self.game.state.DOWNLOADING or self.current_state == self.game.state.UPDATE_DOWNLOADING):
             self.button.set_label(_("downloading.."))
             self.menu_button_cancel.show()

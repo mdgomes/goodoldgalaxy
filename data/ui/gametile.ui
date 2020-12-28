@@ -164,7 +164,6 @@
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>
                 <property name="valign">start</property>
-                <property name="margin-left">2</property>
                 <property name="margin-start">2</property>
                 <property name="margin-top">2</property>
                 <property name="icon-name">view-refresh</property>

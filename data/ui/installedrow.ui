@@ -1,51 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.36.0 -->
+<!-- Generated with glade 3.38.2 -->
 <interface domain="goodoldgalaxy">
   <requires lib="gtk+" version="3.20"/>
   <template class="InstalledRow" parent="GtkBox">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
+    <property name="can-focus">False</property>
     <property name="valign">start</property>
     <property name="hexpand">True</property>
     <property name="orientation">vertical</property>
     <child>
       <object class="GtkEventBox">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="above_child">True</property>
+        <property name="can-focus">False</property>
+        <property name="above-child">True</property>
         <signal name="button-release-event" handler="on_row_button_release" swapped="no"/>
         <child>
           <object class="GtkOverlay">
-            <property name="height_request">40</property>
+            <property name="height-request">40</property>
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <property name="valign">start</property>
             <property name="hexpand">True</property>
             <property name="vexpand">False</property>
             <child>
               <object class="GtkImage" id="image">
-                <property name="width_request">32</property>
-                <property name="height_request">32</property>
+                <property name="width-request">32</property>
+                <property name="height-request">32</property>
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="halign">start</property>
-                <property name="margin_top">2</property>
-                <property name="icon_name">dialog-warning-symbolic</property>
+                <property name="margin-top">2</property>
+                <property name="icon-name">dialog-warning-symbolic</property>
                 <property name="icon_size">0</property>
               </object>
               <packing>
-                <property name="pass_through">True</property>
+                <property name="pass-through">True</property>
                 <property name="index">-1</property>
               </packing>
             </child>
             <child type="overlay">
               <object class="GtkImage" id="update_icon">
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Update available</property>
+                <property name="can-focus">False</property>
+                <property name="tooltip-text" translatable="yes">Update available</property>
                 <property name="halign">end</property>
                 <property name="valign">center</property>
-                <property name="margin_right">2</property>
-                <property name="margin_end">2</property>
+                <property name="margin-end">2</property>
               </object>
               <packing>
                 <property name="index">3</property>
@@ -54,9 +53,9 @@
             <child type="overlay">
               <object class="GtkLabel" id="title_label">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="valign">start</property>
-                <property name="margin_start">38</property>
+                <property name="margin-start">38</property>
                 <property name="ellipsize">end</property>
                 <property name="xalign">0</property>
                 <attributes>
@@ -67,18 +66,18 @@
                 </style>
               </object>
               <packing>
-                <property name="pass_through">True</property>
+                <property name="pass-through">True</property>
                 <property name="index">4</property>
               </packing>
             </child>
             <child type="overlay">
               <object class="GtkLabel" id="last_played_label">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="halign">start</property>
                 <property name="valign">end</property>
-                <property name="margin_start">38</property>
-                <property name="margin_bottom">2</property>
+                <property name="margin-start">38</property>
+                <property name="margin-bottom">2</property>
               </object>
               <packing>
                 <property name="index">5</property>

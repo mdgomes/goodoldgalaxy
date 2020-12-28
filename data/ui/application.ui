@@ -177,21 +177,55 @@
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow" id="installed_window">
+              <object class="GtkStack" id="user_stack">
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="shadow-type">in</property>
+                <property name="can-focus">False</property>
                 <child>
-                  <object class="GtkViewport" id="installed_viewport">
+                  <object class="GtkScrolledWindow" id="installed_window">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can-focus">True</property>
+                    <property name="shadow-type">in</property>
                     <child>
-                      <object class="GtkListBox" id="installed_list">
+                      <object class="GtkViewport" id="installed_viewport">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <child>
+                          <object class="GtkListBox" id="installed_list">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                   </object>
+                  <packing>
+                    <property name="name">installed_stack</property>
+                    <property name="title" translatable="yes">Installed</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow" id="downloads_window">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="shadow-type">in</property>
+                    <child>
+                      <object class="GtkViewport" id="downloads_viewport">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <child>
+                          <object class="GtkListBox" id="downloads_list">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">downloads_stack</property>
+                    <property name="title" translatable="yes">Downloads</property>
+                    <property name="position">1</property>
+                  </packing>
                 </child>
               </object>
               <packing>
@@ -205,12 +239,13 @@
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <child>
-                  <object class="GtkButton" id="downloads_button">
+                  <object class="GtkToggleButton" id="downloads_button">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
                     <property name="tooltip-text" translatable="yes">Downloads</property>
                     <property name="image">downloads_image</property>
+                    <signal name="toggled" handler="on_downloads_button_toogled" swapped="no"/>
                   </object>
                   <packing>
                     <property name="position">0</property>
