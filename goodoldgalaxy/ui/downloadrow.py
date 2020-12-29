@@ -20,6 +20,7 @@ class DownloadRow(Gtk.Box):
     details_label = Gtk.Template.Child()
     download_action = Gtk.Template.Child()
     download_action_image = Gtk.Template.Child()
+    progress_bar = Gtk.Template.Child()
     
     
     def __init__(self, parent, download:Download, api):
@@ -27,7 +28,6 @@ class DownloadRow(Gtk.Box):
         self.parent = parent
         self.download = download
         self.api = api
-        self.progress_bar = None
         self.thumbnail_set = False
         self.image.set_sensitive(True)
         self.title_label.set_text(self.download.title)

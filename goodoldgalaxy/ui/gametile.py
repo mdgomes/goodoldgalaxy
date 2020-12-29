@@ -118,6 +118,14 @@ class GameTile(Gtk.Box):
         elif self.current_state == self.game.state.UPDATABLE or self.current_state == self.game.state.INSTALLED:
             self.parent.parent.download_update(self.game)
 
+    @Gtk.Template.Callback("on_image_released")
+    def on_image_released(self, widget, event):
+        self.parent.parent.show_game_details(self.game)
+
+    @Gtk.Template.Callback("on_focus_in")
+    def on_focus_in(self,widget, event):
+        print("focus_in")
+
     def load_thumbnail(self):
         if self.__set_image():
             return True

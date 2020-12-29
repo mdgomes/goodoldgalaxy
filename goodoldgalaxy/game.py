@@ -254,7 +254,15 @@ class Game:
             supported_platforms.append("mac")
         release_date = None
         if "release_date" in product:
-            release_date = datetime.datetime.strptime(product["release_date"], '%Y-%m-%dT%H:%M:%S%z')
+            rel_date = product["release_date"]
+            if rel_date is not None and rel_date != "":
+                dt = None
+                if isinstance(rel_date,str):
+                    dt = datetime.datetime.strptime(rel_date, '%Y-%m-%dT%H:%M:%S%z')
+                elif isinstance(rel_date,dict):
+                    dt = datetime.datetime.strptime(rel_date["date"], '%Y-%m-%d %H:%M:%S.%f')
+                if dt is not None:
+                    release_date = dt
         dlc = Game(name=product["title"], url=product["purchase_link"], game_id=product["id"])
         dlc.updates=0
         dlc.image_url = product["images"]["menuNotificationAv"]
@@ -332,6 +340,8 @@ class Game:
         return self.name
 
     def __eq__(self, other):
+        if other is None:
+            return False
         if self.id > 0 and other.id > 0:
             if self.id == other.id:
                 return True

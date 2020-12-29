@@ -2,9 +2,9 @@ import os
 import gi
 import threading
 import platform
-from _ftdi1 import NONE
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf,GLib, Gdk
+from goodoldgalaxy.translation import _
 from goodoldgalaxy.ui.login import Login
 from goodoldgalaxy.ui.preferences import Preferences
 from goodoldgalaxy.ui.about import About
@@ -147,12 +147,15 @@ class Window(Gtk.ApplicationWindow):
         if len(self.selection_window.get_children()) > 0:
             self.selection_window.remove(self.selection_window.get_children()[0])
         # destroy existing instance only if game is different
-        if self.details is not None and self.details.game.id != game.id:
-            self.details.destroy()
-            self.details = None
+#        if self.details is not None and self.details.game.id != game.id:
+#            self.details.destroy()
+#            self.details = None
         # create a new instance only if necessary
-        if self.details is None or self.details.game.id != game.id:
+        if self.details is None:
             self.details = Details(self,game,self.api)
+        elif self.details is not None and self.details.game.id != game.id:
+#            self.details = Details(self,game,self.api)
+            self.details.set_game(game)
         # add details to selection window
         self.selection_window.add(self.details)
         self.selection_window.get_vadjustment().set_value(0)

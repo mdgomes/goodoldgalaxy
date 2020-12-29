@@ -277,6 +277,7 @@
     <property name="vexpand">True</property>
     <property name="shadow-type">none</property>
     <signal name="check-resize" handler="on_box_resize" swapped="no"/>
+    <signal name="size-allocate" handler="on_size_allocate" swapped="no"/>
     <child>
       <object class="GtkBox" id="basebox">
         <property name="visible">True</property>
@@ -290,7 +291,6 @@
             <property name="hexpand">True</property>
             <child>
               <object class="GtkImage" id="background_image">
-                <property name="height-request">168</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="hexpand">True</property>
@@ -382,7 +382,7 @@
           </packing>
         </child>
         <child>
-          <!-- n-columns=3 n-rows=8 -->
+          <!-- n-columns=2 n-rows=8 -->
           <object class="GtkGrid">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
@@ -609,30 +609,6 @@
                 <property name="left-attach">1</property>
                 <property name="top-attach">7</property>
               </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
             </child>
           </object>
           <packing>
