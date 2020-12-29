@@ -13,12 +13,12 @@ setup(
     scripts=['bin/goodoldgalaxy'],
 
     data_files=[
-        ('share/applications', ['data/io.github.sharkwouter.goodoldgalaxy.desktop']),
-        ('share/icons/hicolor/128x128/apps', ['data/icons/128x128/io.github.sharkwouter.goodoldgalaxy.png']),
-        ('share/icons/hicolor/192x192/apps', ['data/icons/192x192/io.github.sharkwouter.goodoldgalaxy.png']),
+        ('share/applications', ['data/io.github.mdgomes.goodoldgalaxy.desktop']),
+        ('share/icons/hicolor/128x128/apps', ['data/icons/128x128/io.github.mdgomes.goodoldgalaxy.png']),
+        ('share/icons/hicolor/192x192/apps', ['data/icons/192x192/io.github.mdgomes.goodoldgalaxy.png']),
         ('share/goodoldgalaxy/ui', glob('data/ui/*.ui')),
         ('share/goodoldgalaxy/images', glob('data/images/*')),
-        ('share/metainfo', ['data/io.github.sharkwouter.goodoldgalaxy.metainfo.xml']),
+        ('share/metainfo', ['data/io.github.mdgomes.goodoldgalaxy.metainfo.xml']),
 
         # Add translations
         ('share/goodoldgalaxy/translations/de/LC_MESSAGES/', ['data/mo/de/LC_MESSAGES/goodoldgalaxy.mo']),
@@ -43,15 +43,15 @@ setup(
     ],
 
     # metadata to display on PyPI
-    author="Wouter Wijsman",
-    author_email="wwijsman@live.nl",
+    author="Miguel Gomes",
+    author_email="alka.setzer@gmail.com",
     description="A simple GOG Linux client",
     keywords="GOG gog client gaming gtk Gtk",
-    url="https://github.com/sharkwouter/goodoldgalaxy",  # project home page, if any
+    url="https://github.com/mdgomes/goodoldgalaxy",  # project home page, if any
     project_urls={
-        "Bug Tracker": "https://github.com/sharkwouter/goodoldgalaxy/issues",
-        "Documentation": "https://github.com/sharkwouter/goodoldgalaxy/blob/master/README.md",
-        "Source Code": "https://github.com/sharkwouter/goodoldgalaxy",
+        "Bug Tracker": "https://github.com/mdgomes/goodoldgalaxy/issues",
+        "Documentation": "https://github.com/mdgomes/goodoldgalaxy/blob/master/README.md",
+        "Source Code": "https://github.com/mdgomes/goodoldgalaxy",
     },
     classifiers=[
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
