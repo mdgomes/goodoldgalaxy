@@ -8,6 +8,8 @@ A simple GOG client for Linux forked from [Minigalaxy](https://github.com/sharkw
 
 ![screenshot-details](screenshot-details.jpg?raw=true)
 
+![screenshot-downloads](screenshot-downloads.jpg?raw=true)
+
 ## Features
 
 The most important features of Good Old Galaxy:
@@ -63,7 +65,7 @@ Good Old Galaxy should work on the following distributions:
 - MX Linux 19
 - Solus
 
-Good Old Galaxy does **not** ship for the following distributions because they do not contain the required version of PyGObject:
+Good Old Galaxy will **not** work for the following distributions because they do not contain the required version of PyGObject:
 
 - Ubuntu 18.04
 - Linux Mint 19.3
