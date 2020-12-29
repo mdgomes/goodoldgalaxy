@@ -156,7 +156,8 @@ class GameRow(Gtk.Box):
         image_url = "https:{}_100.jpg".format(self.game.image_url)
         thumbnail = os.path.join(THUMBNAIL_DIR, "{}_100.jpg".format(self.game.id))
 
-        download = Download(image_url, thumbnail, finish_func=self.__set_image)
+        download = Download(image_url, thumbnail)
+        download.register_finish_function(self.__set_image)
         DownloadManager.download_now(download)
         return True
 

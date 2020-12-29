@@ -139,7 +139,7 @@ def install_game(game, installer, parent_window=None, main_window=None) -> None:
         tmp_noarch_dir=os.path.join(temp_dir, "data/noarch")
         copytree(tmp_noarch_dir, game.install_dir)
         
-        if Config.get("create_shortcuts") == True:
+        if game.type == "game" and Config.get("create_shortcuts") == True:
             create_shortcuts(game)
 
         # Remove the temporary directory

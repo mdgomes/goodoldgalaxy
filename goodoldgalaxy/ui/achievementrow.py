@@ -44,7 +44,8 @@ class AchievementRow(Gtk.Box):
         image_url = self.achievement.image_url_unlocked if self.achievement.date_unlocked is not None else self.achievement.image_url_locked
         icon = os.path.join(self.game.cache_dir, "achievement_{}_{}.jpg".format(self.achievement.achievement_id,"unlocked" if self.achievement.date_unlocked is not None else "locked"))
 
-        download = Download(image_url, icon, finish_func=self.__set_image)
+        download = Download(image_url, icon)
+        download.register_finish_function(self.__set_image)
         DownloadManager.download_now(download)
         return True
 

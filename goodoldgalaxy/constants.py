@@ -23,8 +23,30 @@ SUPPORTED_DOWNLOAD_LANGUAGES = [
     ["ru", _("Russian")],
     ["es", _("Spanish")],
     ["sv", _("Swedish")],
-    ["tr", _("Turkish")],
+    ["tr", _("Turkish")]
 ]
+
+DOWNLOAD_LANGUAGES_TO_GOG_CODE = {
+    _("Brazilian Portuguese"): "br",
+    _("Chinese"): "cn",
+    _("Danish"): "da",
+    _("Dutch"): "nl",
+    _("English"): "en",
+    _("Finnish"): "fi",
+    _("French"): "fr",
+    _("German"): "de",
+    _("Hungarian"): "hu",
+    _("Italian"): "it",
+    _("Japanese"): "jp",
+    _("Korean"): "ko",
+    _("Norwegian"): "no",
+    _("Polish"): "pl",
+    _("Portuguese"): "pt",
+    _("Russian"): "ru",
+    _("Spanish"): "es",
+    _("Swedish"): "sv",
+    _("Turkish"): "tr"
+}
 
 FEATURES = {
     "achievements": _("Achievements"),
@@ -108,7 +130,7 @@ IETF_DOWNLOAD_LANGUAGES = {
     "ru": _("Russian"),
     "es": _("Spanish"),
     "sv": _("Swedish"),
-    "tr": _("Turkish"),
+    "tr": _("Turkish")
 }
 
 IETF_CODES = {
@@ -151,6 +173,48 @@ IETF_CODES = {
     "zh-CN": _("Chinese"),
     "zh-Hans-CN": _("Simplified Chinese"),
     "zh-Hant-CN": _("Traditional Chinese")
+}
+
+IETF_CODES_TO_DOWNLOAD_LANGUAGES = {
+    "ar-SA": "ar",
+    "be-BY": "be",
+    "bg-BG": "bg",
+    "ca-ES": "es",
+    "cs-CZ": "cs",
+    "da-DK": "da",
+    "de-DE": "de",
+    "en-US": "en",
+    "en-GB": "en",
+    "es-ES": "es",
+    "es-MX": "es",
+    "fa-IR": "fa",
+    "fi-FI": "fi",
+    "fr-FR": "fr",
+    "el-GR": "gr",
+    "he-IL": "he",
+    "hu-HU": "hu",
+    "is-IS": "is",
+    "it-IT": "it",
+    "iu-CA": "iu",
+    "ja-JP": "ja",
+    "ko-KR": "ko",
+    "nb-NO": "nb",
+    "nl-NL": "nl",
+    "no-NO": "no",
+    "pl-PL": "pl",
+    "pt-BR": "br",
+    "pt-PT": "pt",
+    "ro-RO": "ro",
+    "ru-RU": "ru",
+    "sr-RS": "sr",
+    "sk-SK": "sk",
+    "sv-SE": "sv",
+    "th-TH": "th",
+    "tr-TR": "tr",
+    "uk-UA": "uk",
+    "zh-CN": "cn",
+    "zh-Hans-CN": "cn",
+    "zh-Hant-CN": "cn"
 }
 
 PROD_TYPES = {

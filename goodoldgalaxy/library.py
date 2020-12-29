@@ -162,6 +162,30 @@ class Library():
             self.tags.append(tag)
         self.tags.sort()
         self.last_api_check = time.time()
+        
+    def update_dlcs_for_game(self, game: Game):
+        """
+        Update DLCs for a given game.
+        
+        Parameters:
+        -----------
+            game: Game -> Game for which we want to know about dlc's
+        """
+        if game is None:
+            return
+        response = self.api.get_info(game)
+        if "expanded_dlcs" in response:
+            dlcs = response["expanded_dlcs"]
+            for dlc in dlcs:
+                downloads = dlc["downloads"]
+                for dltype in downloads:
+                    if dltype == "bonus_content":
+                        continue
+                    items = downloads[dltype]
+                    for item in items:
+                        # add game to dlc list
+                        game.add_dlc_from_json(dlc)
+        
     
     def get_installed_games(self) -> List[Game]:
         return self.__get_installed_games()
@@ -185,17 +209,17 @@ class Library():
         else:
             return sortfn(self.games, key, reverse)
 
-    def get_filtered_games(self, installed = None, platform = None, genre = None, tag = None, name = None) -> List[Game]:
+    def get_filtered_games(self, installed = None, platform = None, genre = None, tag = None, state = None, name = None) -> List[Game]:
         if self.fetching == 1:
             return self.games
         games = []
         for game in self.games:
-            if (self.is_game_filtered(game, installed, platform, genre, tag, name) == False):
+            if (self.is_game_filtered(game, installed, platform, genre, tag, state, name) == False):
                 continue
             games.append(game)
         return games
         
-    def is_game_filtered(self, game, installed = None, platform = None, genre = None, tag = None, name = None) -> bool:
+    def is_game_filtered(self, game, installed = None, platform = None, genre = None, tag = None, state = None, name = None) -> bool:
         if (installed == True and game.installed == 0):
             return False
         if (platform is not None):
@@ -233,6 +257,19 @@ class Library():
                         found = True
                         break
                 if found == False:
+                    return False
+        if (state is not None):
+            # string
+            if isinstance(state,str) and ((state == "installed" and game.installed == 0) or (state == "updated" and game.updates == 0)):
+                return False
+            elif isinstance(state, list):
+                # state handles as an AND of state instead of an OR like the other filters 
+                found = 0
+                for stat in state:
+                    if (stat == "installed" and game.installed > 0) or (stat == "updated" and game.updates > 0):
+                        found = found + 1
+                        break
+                if found < len(state):
                     return False
         if (name is not None):
             try:

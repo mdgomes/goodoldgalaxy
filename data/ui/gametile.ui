@@ -142,36 +142,44 @@
         <property name="valign">start</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkOverlay">
+          <object class="GtkEventBox">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <signal name="button-release-event" handler="on_image_released" swapped="no"/>
+            <signal name="focus-in-event" handler="on_focus_in" swapped="no"/>
             <child>
-              <object class="GtkImage" id="image">
-                <property name="width-request">196</property>
-                <property name="height-request">110</property>
+              <object class="GtkOverlay">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="icon-name">dialog-warning-symbolic</property>
-                <property name="icon_size">0</property>
+                <child>
+                  <object class="GtkImage" id="image">
+                    <property name="width-request">196</property>
+                    <property name="height-request">110</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">dialog-warning-symbolic</property>
+                    <property name="icon_size">0</property>
+                  </object>
+                  <packing>
+                    <property name="pass-through">True</property>
+                    <property name="index">-1</property>
+                  </packing>
+                </child>
+                <child type="overlay">
+                  <object class="GtkImage" id="update_icon">
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="valign">start</property>
+                    <property name="margin-left">2</property>
+                    <property name="margin-start">2</property>
+                    <property name="margin-top">2</property>
+                    <property name="icon-name">view-refresh</property>
+                  </object>
+                  <packing>
+                    <property name="index">1</property>
+                  </packing>
+                </child>
               </object>
-              <packing>
-                <property name="pass-through">True</property>
-                <property name="index">-1</property>
-              </packing>
-            </child>
-            <child type="overlay">
-              <object class="GtkImage" id="update_icon">
-                <property name="can-focus">False</property>
-                <property name="halign">start</property>
-                <property name="valign">start</property>
-                <property name="margin-left">2</property>
-                <property name="margin-start">2</property>
-                <property name="margin-top">2</property>
-                <property name="icon-name">view-refresh</property>
-              </object>
-              <packing>
-                <property name="index">1</property>
-              </packing>
             </child>
           </object>
           <packing>

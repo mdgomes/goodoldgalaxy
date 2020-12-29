@@ -4,6 +4,7 @@ import threading
 import platform
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf,GLib, Gdk
+from goodoldgalaxy.translation import _
 from goodoldgalaxy.ui.login import Login
 from goodoldgalaxy.ui.preferences import Preferences
 from goodoldgalaxy.ui.about import About
@@ -13,6 +14,7 @@ from goodoldgalaxy.config import Config
 from goodoldgalaxy.paths import UI_DIR, LOGO_IMAGE_PATH, THUMBNAIL_DIR, CACHE_DIR
 from goodoldgalaxy.library import Library
 from goodoldgalaxy.ui.installedrow import InstalledRow
+from goodoldgalaxy.ui.downloadrow import DownloadRow
 from goodoldgalaxy.ui.library import Library as LibraryView
 from goodoldgalaxy.ui.details import Details
 from zipfile import BadZipFile
@@ -34,6 +36,11 @@ class Window(Gtk.ApplicationWindow):
     selection_label = Gtk.Template.Child()
     selection_window = Gtk.Template.Child()
     installed_list = Gtk.Template.Child()
+    downloads_button = Gtk.Template.Child()
+    user_stack = Gtk.Template.Child()
+    downloads_window = Gtk.Template.Child()
+    installed_window = Gtk.Template.Child()
+    downloads_list = Gtk.Template.Child()
 
     def __init__(self, name):
         Gtk.ApplicationWindow.__init__(self, title=name)
@@ -77,6 +84,9 @@ class Window(Gtk.ApplicationWindow):
             print("last view as game..")
         else:
             self.__show_library()
+            
+        # Register self as a download manager listener
+        DownloadManager.register_listener(self.__download_listener_func)
 
     def get_screen_resolution(self, measurement="px"):
         """
@@ -136,7 +146,17 @@ class Window(Gtk.ApplicationWindow):
         # first remove any existing child
         if len(self.selection_window.get_children()) > 0:
             self.selection_window.remove(self.selection_window.get_children()[0])
-        self.details = Details(self,game,self.api)
+        # destroy existing instance only if game is different
+#        if self.details is not None and self.details.game.id != game.id:
+#            self.details.destroy()
+#            self.details = None
+        # create a new instance only if necessary
+        if self.details is None:
+            self.details = Details(self,game,self.api)
+        elif self.details is not None and self.details.game.id != game.id:
+#            self.details = Details(self,game,self.api)
+            self.details.set_game(game)
+        # add details to selection window
         self.selection_window.add(self.details)
         self.selection_window.get_vadjustment().set_value(0)
     
@@ -166,7 +186,7 @@ class Window(Gtk.ApplicationWindow):
         install_thread = threading.Thread(target=self.__install,args=[game])
         install_thread.start()
             
-    def uninstall_game(self, game: Game):
+    def uninstall_game(self, game: Game) -> bool:
         message_dialog = Gtk.MessageDialog(parent=self,
                                            flags=Gtk.DialogFlags.MODAL,
                                            message_type=Gtk.MessageType.WARNING,
@@ -178,8 +198,10 @@ class Window(Gtk.ApplicationWindow):
             uninstall_thread = threading.Thread(target=self.__uninstall_game,args=[game])
             uninstall_thread.start()
             message_dialog.destroy()
+            return True
         elif response == Gtk.ResponseType.CANCEL:
             message_dialog.destroy()
+        return False
             
     def __update_to_state(self, state, game: Game):
         game.state = state
@@ -193,13 +215,13 @@ class Window(Gtk.ApplicationWindow):
             self.details.update_to_state(state)
                     
     def download_game(self, game: Game):
-        if game.sidebar_tile is None:
+        if game.type == "game" and game.sidebar_tile is None:
             game.sidebar_tile = InstalledRow(self, game, self.api)
             GLib.idle_add(self.installed_list.prepend,game.sidebar_tile)
         # start download
         download_thread = threading.Thread(target=self.__download_file,args=[game])
         download_thread.start()
-    
+
     def __download_file(self,game: Game, operating_system = None) -> None:
         Config.set("current_download", game.id)
         GLib.idle_add(self.__update_to_state, game.state.QUEUED, game)
@@ -228,16 +250,16 @@ class Window(Gtk.ApplicationWindow):
                 download_path = "{}-{}.bin".format(self.download_path, key)
             download = Download(
                 url=self.api.get_real_download_link(file_info["downlink"]),
+                title=download_info["name"],
+                associated_object=game,
                 save_location=download_path,
-                finish_func=finish_func,
-                finish_func_args=game,
-                progress_func=self.set_progress,
-                progress_func_args=game,
-                cancel_func=self.__cancel_download,
-                cancel_func_args=game,
                 number=key+1,
+                file_size=download_info["total_size"],
                 out_of_amount=len(download_info['files'])
             )
+            download.register_finish_function(finish_func,game)
+            download.register_progress_function(self.set_progress,game)
+            download.register_cancel_function(self.__cancel_download,game)
             game.downloads.append(download)
 
         DownloadManager.download(game.downloads)
@@ -255,6 +277,63 @@ class Window(Gtk.ApplicationWindow):
             return
         GLib.idle_add(self.__update_to_state, game.state.INSTALLED, game)
         GLib.idle_add(self.__reload_state, game)
+        # make user to add the game to the side bar
+        
+        # check if DLCs should also be installed
+        if game.type == "game" and Config.get("install_dlcs"):
+            # first ensure we know about game dlcs
+            self.library.update_dlcs_for_game(game)
+            if len(game.dlcs) == 0:
+                return
+            # now grab DLCs that can be installed
+            downloads = []
+            for dlc in game.dlcs:
+                try:
+                    download_info = self.api.get_download_info(dlc, game.platform, True, dlc.get_installers())
+                except Exception:
+                    # could not find a valid target, ignore it
+                    continue
+                # set dlc information now, otherwise this will break later
+                dlc.platform = game.platform
+                dlc.language = game.language
+                # add download
+                # Start the download for all files
+                for key, file_info in enumerate(download_info['files']):
+                    if key > 0:
+                        download_path = "{}-{}.bin".format(dlc.download_path, key)
+                    else:
+                        download_path = dlc.download_path
+                    download = Download(
+                        url=self.api.get_real_download_link(file_info["downlink"]),
+                        title=dlc.name,
+                        associated_object=dlc,
+                        save_location=download_path,
+                        number=key+1,
+                        file_size=download_info["total_size"],
+                        out_of_amount=len(download_info['files'])
+                    )
+                    download.register_finish_function(self.__dlc_finish_func,[game,dlc])
+                    download.register_progress_function(self.set_progress,game)
+                    download.register_cancel_function(self.__cancel_download,game)
+                    downloads.append(download)
+            DownloadManager.download(downloads)
+                    
+    def __dlc_finish_func(self, args):
+        game = args[0]
+        dlc = args[1]
+        if dlc is None:
+            return
+        # install DLC
+        try:
+            if os.path.exists(dlc.keep_path):
+                install_game(dlc, dlc.keep_path, main_window=self)
+            else:
+                install_game(dlc, dlc.download_path, main_window=self)
+        except (FileNotFoundError, BadZipFile):
+            # error, revert state
+            return
+        # No error, install was successful, as such update information
+        game.set_dlc_status(dlc.name, "installed" , dlc.available_version)
 
     def __reload_state(self,game: Game = None):
         if game.list_tile is not None:
@@ -362,8 +441,38 @@ class Window(Gtk.ApplicationWindow):
         # Remove game from sidebar if it is there
         if game.sidebar_tile is not None:
             self.installed_list.remove(game.sidebar_tile.get_parent())
+            game.sidebar_tile = None
         uninstall_game(game)
         GLib.idle_add(self.__update_to_state, game.state.DOWNLOADABLE, game)
+        
+    def __update_downloads(self):
+        # disabled now
+        for child in self.downloads_list.get_children():
+            self.downloads_list.remove(child)
+    
+        for download in DownloadManager.list():
+            row = DownloadRow(self.downloads_list, download, self.api)
+            GLib.idle_add(self.downloads_list.prepend,row)
+    
+    def __download_listener_func(self, download: Download = None):
+        if download is None or download.priority() < 0:
+            return
+        # create a new download row
+        row = DownloadRow(self.downloads_list, download, self.api)
+        GLib.idle_add(self.downloads_list.prepend,row)
+
+    @Gtk.Template.Callback("on_downloads_button_toogled")
+    def on_downloads_button_toogled(self, button):
+        if button.get_active():
+            self.installed_window.hide()
+            self.downloads_window.show()
+            #self.__update_downloads()
+            self.user_stack.set_visible_child_name("downloads_stack")
+        else:
+            self.installed_window.show()
+            self.downloads_window.hide()
+            self.user_stack.set_visible_child_name("installed_stack")
+
 
     @Gtk.Template.Callback("on_selection_button_clicked")
     def on_selection_button_clicked(self, button):
@@ -416,7 +525,7 @@ class Window(Gtk.ApplicationWindow):
         self.resume_download_if_expected()
     
     @Gtk.Template.Callback("on_menu_sync_clicked")
-    def sync_library(self, _=""): 
+    def sync_library(self): 
         sync_thread = threading.Thread(target=self.__sync_library)
         sync_thread.start()
 

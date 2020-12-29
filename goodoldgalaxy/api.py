@@ -1,9 +1,9 @@
 import os
 import time
 from urllib.parse import urlencode
+from typing import List
 import json
 import math
-from typing import List
 from goodoldgalaxy.game import Game
 from goodoldgalaxy.achievement import Achievement
 from goodoldgalaxy.constants import IGNORE_GAME_IDS, SESSION
@@ -205,7 +205,7 @@ class Api:
         return achievements
     
     # Get Extrainfo about several games
-    def get_infos(self, games: List[Game]) -> tuple:
+    def get_infos(self, games: [Game]) -> tuple:
         glen = len(games)
         if glen <= 50:
             return self.__get_infos(games)
@@ -293,7 +293,7 @@ class Api:
             if installer['language'] == "en":
                 download_info = installer
 
-        # Return last entry in possible_downloads. This will either be English or the first langauge in the list
+        # Return last entry in possible_downloads. This will either be English or the first language in the list
         # This is just a backup, if the preferred language has been found, this part won't execute
         return download_info
 
@@ -324,7 +324,8 @@ class Api:
             if os.path.exists(user_dir) == False:
                 os.makedirs(user_dir)
             avatar = os.path.join(user_dir, "avatar_menu_user_av_small.jpg")
-            download = Download(response["avatar"]+"_menu_user_av_small.jpg", avatar, finish_func=finish_fn)
+            download = Download(response["avatar"]+"_menu_user_av_small.jpg", avatar)
+            download.register_finish_function(finish_fn)
             DownloadManager.download_now(download)
         return username
 

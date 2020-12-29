@@ -118,6 +118,14 @@ class GameTile(Gtk.Box):
         elif self.current_state == self.game.state.UPDATABLE or self.current_state == self.game.state.INSTALLED:
             self.parent.parent.download_update(self.game)
 
+    @Gtk.Template.Callback("on_image_released")
+    def on_image_released(self, widget, event):
+        self.parent.parent.show_game_details(self.game)
+
+    @Gtk.Template.Callback("on_focus_in")
+    def on_focus_in(self,widget, event):
+        print("focus_in")
+
     def load_thumbnail(self):
         if self.__set_image():
             return True
@@ -128,7 +136,8 @@ class GameTile(Gtk.Box):
         image_url = "https:{}_196.jpg".format(self.game.image_url)
         thumbnail = os.path.join(THUMBNAIL_DIR, "{}_196.jpg".format(self.game.id))
 
-        download = Download(image_url, thumbnail, finish_func=self.__set_image)
+        download = Download(image_url, thumbnail)
+        download.register_finish_function(self.__set_image)
         DownloadManager.download_now(download)
         return True
 

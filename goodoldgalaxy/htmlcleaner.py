@@ -8,7 +8,7 @@ class HTMLCleaner(HTMLParser):
     def __init__(self,html: str):
         HTMLParser.__init__(self)
         self.parsed_str = ""
-        self.feed(html.replace("\n","").replace("<br></li>","</li>"))
+        self.feed(html.replace("\n","").replace("<br></li>","</li>").replace("&","and"))
         self.close()
         
     def handle_starttag(self, tag, attrs):
