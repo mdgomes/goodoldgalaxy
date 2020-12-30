@@ -10,7 +10,9 @@ from goodoldgalaxy.config import Config
 from goodoldgalaxy.constants import IETF_CODES_TO_DOWNLOAD_LANGUAGES
 
 class Game:
-    state = Enum('state', 'DOWNLOADABLE INSTALLABLE UPDATABLE QUEUED DOWNLOADING INSTALLING INSTALLED NOTLAUNCHABLE UNINSTALLING UPDATING UPDATE_QUEUED UPDATE_DOWNLOADING UPDATE_INSTALLABLE')
+    """Class that represents a GOG Game or DLC.
+    """
+    __state = Enum('state', 'DOWNLOADABLE INSTALLABLE UPDATABLE QUEUED DOWNLOADING INSTALLING INSTALLED NOTLAUNCHABLE UNINSTALLING UPDATING UPDATE_QUEUED UPDATE_DOWNLOADING UPDATE_INSTALLABLE')
     valid_filename_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
     char_limit = 255
     
@@ -19,6 +21,13 @@ class Game:
                  url: str = None, 
                  game_id: int = 0
         ):
+        """Creates a new Game instance.
+
+        Args:
+            name (str): Game/DLC title
+            url (str, optional): Game URL. Defaults to None.
+            game_id (int, optional): Game identifier. Defaults to 0.
+        """
         self.name = name
         self.url = url
         self.id = game_id
@@ -43,7 +52,8 @@ class Game:
         self.installed: int = 0
         self.installed_version: str = None
         self.available_version: str = None
-        self.state:Enum = self.state.INSTALLABLE
+        # State is now private
+        self.__state:Enum = self.__state.INSTALLABLE
         self.cache_dir: str = os.path.join(CACHE_DIR, "game/{}".format(game_id))
         if os.path.exists(self.cache_dir) == False:
             os.makedirs(self.cache_dir)
@@ -74,23 +84,81 @@ class Game:
         
         # available downloads
         self.__downloads = []
+        
+        # registered state listeners
+        self.__state_listeners = []
+        
+    def register_state_listener(self,listener_func):
+        """
+        Register a state listener function that wants to be let know about new states.
+        
+        Args:
+            listener_func (lambda): Listener function to register that receives on argument that is a state instance
+        """
+        if listener_func is None:
+            return
+        self.__state_listeners.append(listener_func)
+        
+    def unregister_state_listener(self,listener_func):
+        """
+        Unregister a state listener function.
+        
+        Args:
+            listener_func (lambda): Listener function to unregister
+        """
+        if listener_func is None:
+            return 
+        self.__state_listeners.remove(listener_func)
+
+    def set_state(self, state, notify: bool = True):
+        """
+        Sets the game state and notifies all listeners about it
+
+        Args:
+            state (Enum): State to set
+            notify (bool): True if listeners should be notified about the state change, False otherwise
+        """
+        self.__state = state
+        if notify == False:
+            return
+        for listener_func in self.__state_listeners:
+            listener_func(self,state)
+
+
+    def state(self):
+        """Gets the game state.
+
+        Returns:
+            Enum: Game state
+        """
+        return self.__state
 
     def get_install_dir(self):
+        """Gets the install directory path.
+
+        Returns:
+            str: Install directory
+        """
         if self.install_dir:
             return self.install_dir
         return os.path.join(Config.get("install_dir"), self.get_install_directory_name())
     
     def get_installers(self) -> list:
-        """
-        Gets the list of available installers.
+        """Gets the list of available installers.
         
-        Return:
-        -------
-            List of available installers
+        Returns:
+            list: List of available installers.
         """
-        return self.__downloads
+        return self.__downloads;
 
     def set_installed(self, platform: str, install_dir:str , installed_version:str = None):
+        """Indicates that the game was installed and specifies relevant information.
+
+        Args:
+            platform (str): Platform that was installed (linux, windows, osx)
+            install_dir (str): Install directory
+            installed_version (str, optional): Installed version. Defaults to None.
+        """
         self.installed = 1
         self.platform = platform
         self.install_dir = install_dir
@@ -98,25 +166,40 @@ class Game:
         if installed_version is not None:
             self.installed_version = installed_version
         # set game to installed
-        self.state = self.state.INSTALLED
+        self.set_state(self.__state.INSTALLED)
         # make sure platform is in supported platforms
         if platform is not None and platform not in self.supported_platforms:
             self.supported_platforms.append(platform)
         self.dlc_status_file_path = os.path.join(self.install_dir, self.dlc_status_file_name)
 
     def set_main_genre(self,genre:str):
+        """Sets the Game's main genre. Will also add it to the list of genres.
+
+        Args:
+            genre (str): Game genre
+        """
         self.genre = genre
         # make sure genre is in genres
         if genre is not None and genre not in self.genres:
             self.genres.append(genre)
 
     def add_genre(self, genre:str):
+        """Adds a genre to this game. Will set the main genre if not set.
+
+        Args:
+            genre (str): Genre name
+        """
         if self.genre is None:
             self.set_main_genre(genre)
             return
         self.genres.append(genre)
 
     def set_installed_language(self, language:str):
+        """Sets the Game's installed language. Will also add it to the list of languages.
+
+        Args:
+            language (str): Installed language
+        """
         self.language = language
         # make sure supported languages has this language
         if language is not None and language not in self.supported_languages:
@@ -238,6 +321,13 @@ class Game:
             dlc_status_file.close()
 
     def add_dlc_from_json(self, product, platform=None, language=None):
+        """Adds a DLC from a JSON representation of it.
+
+        Args:
+            product (JSON): JSON object (or dict) which represents the DLC
+            platform (str, optional): DLC installed platform. Defaults to None.
+            language (str, optional): DLC installed language. Defaults to None.
+        """
         if product is None:
             return
         for i in self.dlcs:
@@ -310,7 +400,7 @@ class Game:
         dlc.installed = 1 if self.get_dlc_status(dlc.name, dlc.available_version) == "installed" else 0
         dlc.installed_version = self.get_dlc_installed_version(dlc.name)
         if dlc.installed == 1:
-            dlc.state = self.state.INSTALLED
+            dlc.__state = self.__state.INSTALLED
             dlc.language = self.language
             dlc.platform = self.platform
             dlc.updates = 1 if dlc.installed_version != dlc.available_version else 0
@@ -319,7 +409,7 @@ class Game:
             dlc.language = language
         # add DLC to supported DLCs for this game
         if dlc.updates == 1:
-            dlc.state = self.state.UPDATABLE
+            dlc.__state = self.__state.UPDATABLE
         self.dlcs.append(dlc)
 
     def __clean_filename(self, filename, whitelist=valid_filename_chars, replace=' '):

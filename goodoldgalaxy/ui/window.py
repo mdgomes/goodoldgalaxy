@@ -118,7 +118,7 @@ class Window(Gtk.ApplicationWindow):
         download_id = Config.get("current_download")
         all_games = self.library.get_games()
         for game in all_games:
-            if download_id and download_id == game.id and game.state != game.state.INSTALLED:
+            if download_id and download_id == game.id and game.__state != game.__state.INSTALLED:
                 self.download_game(game)
 
     # Do not restart the download if goodoldgalaxy is restarted
@@ -204,7 +204,7 @@ class Window(Gtk.ApplicationWindow):
         return False
             
     def __update_to_state(self, state, game: Game):
-        game.state = state
+        game.__state = state
         if game.list_tile is not None:
             game.list_tile.update_to_state(state)
         if game.grid_tile is not None:
@@ -224,7 +224,7 @@ class Window(Gtk.ApplicationWindow):
 
     def __download_file(self,game: Game, operating_system = None) -> None:
         Config.set("current_download", game.id)
-        GLib.idle_add(self.__update_to_state, game.state.QUEUED, game)
+        GLib.idle_add(self.__update_to_state, game.__state.QUEUED, game)
         
         current_os = platform.system()
         if current_os == "Linux":
@@ -265,7 +265,7 @@ class Window(Gtk.ApplicationWindow):
         DownloadManager.download(game.downloads)
 
     def __install(self, game: Game = None):
-        GLib.idle_add(self.__update_to_state, game.state.INSTALLING, game)
+        GLib.idle_add(self.__update_to_state, game.__state.INSTALLING, game)
         game.install_dir = game.get_install_dir()
         try:
             if os.path.exists(game.keep_path):
@@ -273,9 +273,9 @@ class Window(Gtk.ApplicationWindow):
             else:
                 install_game(game, game.download_path, main_window=self)
         except (FileNotFoundError, BadZipFile):
-            GLib.idle_add(self.__update_to_state, game.state.DOWNLOADABLE, game)
+            GLib.idle_add(self.__update_to_state, game.__state.DOWNLOADABLE, game)
             return
-        GLib.idle_add(self.__update_to_state, game.state.INSTALLED, game)
+        GLib.idle_add(self.__update_to_state, game.__state.INSTALLED, game)
         GLib.idle_add(self.__reload_state, game)
         # make user to add the game to the side bar
         
@@ -360,14 +360,14 @@ class Window(Gtk.ApplicationWindow):
     def __cancel_download(self, game: Game = None):
         DownloadManager.cancel_download(game.downloads)
         GLib.idle_add(self.__reload_state,game)
-        if game.state == game.state.DOWNLOADING:
+        if game.__state == game.__state.DOWNLOADING:
             ## remove sidebar tile
             if game.sidebar_tile is not None:
                 game.sidebar_tile.get_parent().get_parent().remove(game.sidebar_tile.get_parent())
                 game.sidebar_tile = None
-            GLib.idle_add(self.__update_to_state, game.state.DOWNLOADABLE, game)
-        elif game.state == game.state.UPDATE_DOWNLOADING:
-            GLib.idle_add(self.__update_to_state, game.state.INSTALLED, game)
+            GLib.idle_add(self.__update_to_state, game.__state.DOWNLOADABLE, game)
+        elif game.__state == game.__state.UPDATE_DOWNLOADING:
+            GLib.idle_add(self.__update_to_state, game.__state.INSTALLED, game)
     
     def download_update(self, game: Game):
         if game.sidebar_tile is None:
@@ -379,7 +379,7 @@ class Window(Gtk.ApplicationWindow):
         
     def __download_update(self,game: Game = None) -> None:
         Config.set("current_download", game.id)
-        GLib.idle_add(self.__update_to_state, game.state.UPDATE_QUEUED, game)
+        GLib.idle_add(self.__update_to_state, game.__state.UPDATE_QUEUED, game)
         download_info = self.api.get_download_info(game)
 
         # Start the download for all files
@@ -406,7 +406,7 @@ class Window(Gtk.ApplicationWindow):
         DownloadManager.download(game.downloads)
         
     def __update(self, game: Game = None):
-        GLib.idle_add(self.__update_to_state, game.state.UPDATING, game)
+        GLib.idle_add(self.__update_to_state, game.__state.UPDATING, game)
         game.install_dir = self.__get_install_dir(game)
         try:
             if os.path.exists(game.keep_path):
@@ -414,21 +414,21 @@ class Window(Gtk.ApplicationWindow):
             else:
                 install_game(self.game, self.update_path, parent_window=self.parent)
         except (FileNotFoundError, BadZipFile):
-            GLib.idle_add(self.__update_to_state, game.state.UPDATABLE, game)
+            GLib.idle_add(self.__update_to_state, game.__state.UPDATABLE, game)
             return
         # reset updates count flag
         game.updates = 0
-        GLib.idle_add(self.__update_to_state, game.state.INSTALLED, game)
+        GLib.idle_add(self.__update_to_state, game.__state.INSTALLED, game)
 
     def __cancel_update(self, game: Game = None):
-        GLib.idle_add(self.__update_to_state, game.state.UPDATABLE, game)
+        GLib.idle_add(self.__update_to_state, game.__state.UPDATABLE, game)
         GLib.idle_add(self.__reload_state, game)
 
     def set_progress(self, percentage: int, game: Game = None):
-        if game.state == game.state.QUEUED:
-            GLib.idle_add(self.__update_to_state, game.state.DOWNLOADING, game)
-        if game.state == game.state.UPDATE_QUEUED:
-            GLib.idle_add(self.__update_to_state, game.state.UPDATE_DOWNLOADING, game)
+        if game.__state == game.__state.QUEUED:
+            GLib.idle_add(self.__update_to_state, game.__state.DOWNLOADING, game)
+        if game.__state == game.__state.UPDATE_QUEUED:
+            GLib.idle_add(self.__update_to_state, game.__state.UPDATE_DOWNLOADING, game)
         if game.sidebar_tile is not None and game.sidebar_tile.progress_bar:
             GLib.idle_add(game.sidebar_tile.progress_bar.set_fraction, percentage/100)
         if game.list_tile is not None and game.list_tile.progress_bar:
@@ -437,13 +437,13 @@ class Window(Gtk.ApplicationWindow):
             GLib.idle_add(game.grid_tile.progress_bar.set_fraction, percentage/100)
 
     def __uninstall_game(self,game: Game = None):
-        GLib.idle_add(self.__update_to_state, game.state.UNINSTALLING, game)
+        GLib.idle_add(self.__update_to_state, game.__state.UNINSTALLING, game)
         # Remove game from sidebar if it is there
         if game.sidebar_tile is not None:
             self.installed_list.remove(game.sidebar_tile.get_parent())
             game.sidebar_tile = None
         uninstall_game(game)
-        GLib.idle_add(self.__update_to_state, game.state.DOWNLOADABLE, game)
+        GLib.idle_add(self.__update_to_state, game.__state.DOWNLOADABLE, game)
         
     def __update_downloads(self):
         # disabled now

@@ -27,7 +27,7 @@ class InstalledRow(Gtk.Box):
         self.progress_bar = None
         self.thumbnail_set = False
         self.title_label.set_text(self.game.name)
-        self.current_state = self.game.state
+        self.current_state = self.game.state()
         
         self.last_played_label.set_text(_("Not yet played"))
 
@@ -81,10 +81,10 @@ class InstalledRow(Gtk.Box):
 
     def update_to_state(self, state):
         self.current_state = state
-        if state == self.game.state.QUEUED or state == self.game.state.UPDATE_QUEUED:
+        if state == self.game.__state.QUEUED or state == self.game.__state.UPDATE_QUEUED:
             self.image.set_sensitive(False)
             self.__create_progress_bar()
-        elif state == self.game.state.DOWNLOADING or state == self.game.state.UPDATE_DOWNLOADING:
+        elif state == self.game.__state.DOWNLOADING or state == self.game.__state.UPDATE_DOWNLOADING:
             self.image.set_sensitive(False)
             if not self.progress_bar:
                 self.__create_progress_bar()
@@ -105,14 +105,14 @@ class InstalledRow(Gtk.Box):
             self.update_icon.hide()
                
     def reload_state(self):
-        dont_act_in_states = [self.game.state.QUEUED, self.game.state.DOWNLOADING, self.game.state.INSTALLING, self.game.state.UNINSTALLING, self.game.state.UPDATING, self.game.state.UPDATE_QUEUED, self.game.state.UPDATE_DOWNLOADING]
+        dont_act_in_states = [self.game.__state.QUEUED, self.game.__state.DOWNLOADING, self.game.__state.INSTALLING, self.game.__state.UNINSTALLING, self.game.__state.UPDATING, self.game.__state.UPDATE_QUEUED, self.game.__state.UPDATE_DOWNLOADING]
         if self.current_state in dont_act_in_states:
             self.image.set_sensitive(True)
             return
         if self.game.install_dir and os.path.exists(self.game.install_dir):
-            self.update_to_state(self.game.state.INSTALLED)
+            self.update_to_state(self.game.__state.INSTALLED)
         elif os.path.exists(self.keep_path):
-            self.update_to_state(self.game.state.INSTALLABLE)
+            self.update_to_state(self.game.__state.INSTALLABLE)
         else:
-            self.update_to_state(self.game.state.DOWNLOADABLE)
+            self.update_to_state(self.game.__state.DOWNLOADABLE)
         self.update_options()
