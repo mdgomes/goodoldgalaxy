@@ -7,6 +7,7 @@ from goodoldgalaxy.translation import _
 from goodoldgalaxy.paths import UI_DIR
 from goodoldgalaxy.download import Download
 from goodoldgalaxy.download_manager import DownloadManager
+from goodoldgalaxy.game import Game
 
 
 @Gtk.Template.from_file(os.path.join(UI_DIR, "installedrow.ui"))
@@ -19,7 +20,7 @@ class InstalledRow(Gtk.Box):
     title_label = Gtk.Template.Child()
     last_played_label = Gtk.Template.Child()
     
-    def __init__(self, parent, game, api):
+    def __init__(self, parent, game: Game, api):
         Gtk.Frame.__init__(self)
         self.parent = parent
         self.game = game
@@ -27,7 +28,9 @@ class InstalledRow(Gtk.Box):
         self.progress_bar = None
         self.thumbnail_set = False
         self.title_label.set_text(self.game.name)
-        self.current_state = self.game.state()
+        self.current_state = self.game.get_state()
+        # register state listeners
+        self.game.register_state_listener(self.__game_state_listener)
         
         self.last_played_label.set_text(_("Not yet played"))
 
@@ -36,9 +39,36 @@ class InstalledRow(Gtk.Box):
         # Icon if update is available
         self.update_options()
         
-
-    def __str__(self):
-        return self.game.name
+    def update_progress(self, percentage: int):
+        """Updates the download progress.
+        
+        Args:
+            percentage (int): Current download percentage
+        """
+        if not self.progress_bar:
+            # create progress bar if not existing
+            self.__create_progress_bar()
+        if self.progress_bar:
+            GLib.idle_add(self.progress_bar.set_fraction, percentage/100)
+            
+    def update_download_state(self, state):
+        """Updates the download state progress.
+        
+        Args:
+            state (Enum): Current download state
+        """
+        if state == state.FINISHED or state == state.CANCELED or state == state.ERROR:
+            # remove the progress bar
+            if self.progress_bar:
+                self.progress_bar.destroy() 
+        
+    def __game_state_listener(self, game: Game, state):
+        if game != self.game:
+            return
+        # unregister listeners
+        if state == game.state.DOWNLOADABLE:
+            self.game.unregister_state_listener(self.__game_state_listener)
+        self.update_to_state(state)
 
     def load_icon(self):
         if self.__set_image():
@@ -65,10 +95,6 @@ class InstalledRow(Gtk.Box):
     @Gtk.Template.Callback("on_row_button_release")
     def on_row_button_release(self, widget, event):
         self.parent.show_game_details(self.game)
-    
-    def set_progress(self, percentage: int):
-        if self.progress_bar:
-            GLib.idle_add(self.progress_bar.set_fraction, percentage/100)
 
     def __create_progress_bar(self) -> None:
         self.progress_bar = Gtk.ProgressBar()
@@ -81,10 +107,10 @@ class InstalledRow(Gtk.Box):
 
     def update_to_state(self, state):
         self.current_state = state
-        if state == self.game.__state.QUEUED or state == self.game.__state.UPDATE_QUEUED:
+        if state == self.game.state.QUEUED or state == self.game.state.UPDATE_QUEUED:
             self.image.set_sensitive(False)
             self.__create_progress_bar()
-        elif state == self.game.__state.DOWNLOADING or state == self.game.__state.UPDATE_DOWNLOADING:
+        elif state == self.game.state.DOWNLOADING or state == self.game.state.UPDATE_DOWNLOADING:
             self.image.set_sensitive(False)
             if not self.progress_bar:
                 self.__create_progress_bar()
@@ -105,14 +131,18 @@ class InstalledRow(Gtk.Box):
             self.update_icon.hide()
                
     def reload_state(self):
-        dont_act_in_states = [self.game.__state.QUEUED, self.game.__state.DOWNLOADING, self.game.__state.INSTALLING, self.game.__state.UNINSTALLING, self.game.__state.UPDATING, self.game.__state.UPDATE_QUEUED, self.game.__state.UPDATE_DOWNLOADING]
+        dont_act_in_states = [self.game.state.QUEUED, self.game.state.DOWNLOADING, self.game.state.INSTALLING, self.game.state.UNINSTALLING, self.game.state.UPDATING, self.game.state.UPDATE_QUEUED, self.game.state.UPDATE_DOWNLOADING]
         if self.current_state in dont_act_in_states:
             self.image.set_sensitive(True)
             return
         if self.game.install_dir and os.path.exists(self.game.install_dir):
-            self.update_to_state(self.game.__state.INSTALLED)
+            self.update_to_state(self.game.state.INSTALLED)
         elif os.path.exists(self.keep_path):
-            self.update_to_state(self.game.__state.INSTALLABLE)
+            self.update_to_state(self.game.state.INSTALLABLE)
         else:
-            self.update_to_state(self.game.__state.DOWNLOADABLE)
+            self.update_to_state(self.game.state.DOWNLOADABLE)
         self.update_options()
+        
+    def __str__(self):
+        return self.game.name
+

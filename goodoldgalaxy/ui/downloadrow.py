@@ -34,8 +34,8 @@ class DownloadRow(Gtk.Box):
         self.__game = None
         if download.get_progress() >= 0:
             self.details_label.set_text("{} / {} ({}%)".format(self.__sizeof_fmt(download.get_downloaded()),self.__sizeof_fmt(download.file_size),download.get_progress()))
-        elif download.file_size > 0:
-            self.details_label.set_text("{} / {}".format(self.__sizeof_fmt(download.get_downloaded()),self.__sizeof_fmt(download.file_size)))
+        elif int(download.file_size) > 0:
+            self.details_label.set_text("{} / {}".format(self.__sizeof_fmt(download.get_downloaded()),self.__sizeof_fmt(int(download.file_size))))
         self.load_icon()
         
         # set button icon
@@ -111,7 +111,7 @@ class DownloadRow(Gtk.Box):
             self.__create_progress_bar()
         if self.progress_bar:
             GLib.idle_add(self.progress_bar.set_fraction, percentage/100)
-        GLib.idle_add(self.details_label.set_text,"{} / {} ({}%)".format(self.__sizeof_fmt(self.download.get_downloaded()),self.__sizeof_fmt(self.download.file_size),percentage))
+        GLib.idle_add(self.details_label.set_text,"{} / {} ({}%)".format(self.__sizeof_fmt(self.download.get_downloaded()),self.__sizeof_fmt(int(self.download.file_size)),percentage))
 
     def __sizeof_fmt(self, num, suffix='B'):
         for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:

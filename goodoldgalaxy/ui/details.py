@@ -122,10 +122,17 @@ class Details(Gtk.Viewport):
         # bail out if game was not set or we are doing the same game
         if game is None or self.game == game:
             return
+        # unregister state listeners from previous shown game
+        if self.game is not None:
+            # unregister listener for old game
+            self.game.unregister_state_listener(self.__game_state_listener)
+            for dlc in self.game.dlcs:
+                dlc.unregister_state_listener(self.__dlc_state_listener)
+        
         self.game = game
         self.progress_bar = None
         self.download = None
-        self.current_state = self.game.state()
+        self.current_state = self.game.get_state()
         
         # Update paths for current game
         
@@ -395,7 +402,37 @@ class Details(Gtk.Viewport):
             self.background_image.show()
             self.__load_background_image()
         else:
-            self.background_image.hide()  
+            self.background_image.hide()
+            
+        # register state listeners
+        self.game.register_state_listener(self.__game_state_listener)
+        for dlc in self.game.dlcs:
+            dlc.register_state_listener(self.__dlc_state_listener)
+    
+    # state listeners
+    def __game_state_listener(self, game:Game, state):
+        # stuff to change
+        self.update_to_state(state)
+        # Update Installer row 
+        if state == game.state.DOWNLOADABLE:
+            # this progress function is only used for the main game
+            for row in self.downloadstree.get_model():
+                if row[3] != _("Installer"):
+                    continue
+                row[6] = "N/A"
+            for dlc in game.dlcs:
+                self.__dlc_state_listener(dlc, state)
+    
+    def __dlc_state_listener(self, dlc:Game, state):
+        # stuff to change
+        # Update DLC Installer row
+        for row in self.downloadstree.get_model():
+            if row[3] != "DLC "+_("Installer"):
+                continue
+            if state == dlc.state.DOWNLOADABLE:
+                row[6] = "N/A"
+            elif state == dlc.state.INSTALLED:
+                row[6] = _("Install")
     
     def load_achievements(self):
         # hide tab
@@ -547,6 +584,24 @@ class Details(Gtk.Viewport):
             DownloadManager.download(download)
         print("Downloading: \"{}\"".format(link))
 
+    def update_download_state(self, state):
+        # this progress function is only used for the main game
+        for row in self.downloadstree.get_model():
+            if row[3] != _("Installer"):
+                continue
+            val = row[6]
+            if state == state.DOWNLOADING:
+                val = _("Downloading")
+            elif state == state.QUEUED:
+                val = _("Queued")
+            elif state == state.PAUSED:
+                val = _("Paused")
+            elif state == state.FINISHED:
+                val = _("Installable")
+            elif state == state.ERROR or state == state.CANCELED:
+                val = _("Install")
+            row[6] = val
+
     def __state_func(self, state, treeiter:Gtk.TreeIter = None):
         if treeiter is None:
             return
@@ -586,20 +641,47 @@ class Details(Gtk.Viewport):
             self.game.set_dlc_status(dlc.name, "installed" , dlc.available_version)
             self.downloadstree.get_model().set_value(treeiter,6,_("Installed"))
 
-    def __download_file(self,widget,link:str,fname:str = None):
+    def __download_file(self,widget = None,link:str = None,fname:str = None):
+        download_info = None;
+        if link == None:
+            # assume link is for game
+            download_info = self.api.get_download_info(self.game)
+            for file_info in download_info['files']:
+                link = self.api.get_real_download_link(file_info["downlink"])
+                break
         dialog:Gtk.FileChooserDialog = Gtk.FileChooserDialog(_("Download"),self.parent,action=Gtk.FileChooserAction.SAVE,buttons=(Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.ACCEPT))
-        file_name = link[link.rfind("/")+1:] if fname is None else fname
+        file_name = self.game.get_stripped_name() if fname is None else fname
         dialog.set_current_name(file_name)
+        # ensure we are running on the GUI thread
+        Gdk.threads_enter()
         response = dialog.run()
+        Gdk.threads_leave()
         if response == Gtk.ResponseType.ACCEPT:
-            download = Download(
-                url=self.api.get_real_download_link(link),
-                save_location=dialog.get_filename()
-            )
-            DownloadManager.download(download)
-            print("Downloading: \"{}\" to \"{}\"".format(link,dialog.get_filename()))
-            
+            if download_info is None:    
+                download = Download(
+                    url=self.api.get_real_download_link(link),
+                    save_location=dialog.get_filename()
+                )
+                DownloadManager.download(download)
+            else:
+                downloads = []
+                down_count = len(download_info["files"])
+                down_idx = 0
+                for file_info in download_info['files']:
+                    download = Download(
+                        url=self.api.get_real_download_link(file_info["downlink"]),
+                        title=download_info["name"]+" ("+download_info["id"]+"_"+file_info["id"]+")",
+                        save_location=dialog.get_filename()+"_"+file_info["id"],
+                        associated_object=self.game,
+                        out_of_amount=down_count,
+                        number=down_idx
+                    )
+                    downloads.append(download)
+                    down_idx = down_idx+1
+                DownloadManager.download(downloads)
+        Gdk.threads_enter()    
         dialog.destroy()
+        Gdk.threads_leave()
     
     @Gtk.Template.Callback("downloads_filter_changed")
     def downloads_filter_changed(self,widget):
@@ -792,17 +874,16 @@ class Details(Gtk.Viewport):
 
     @Gtk.Template.Callback("on_button_clicked")
     def on_button_click(self, widget) -> None:
-        dont_act_in_states = [self.game.__state.QUEUED, self.game.__state.DOWNLOADING, self.game.__state.INSTALLING, self.game.__state.UNINSTALLING]
+        dont_act_in_states = [self.game.state.QUEUED, self.game.state.DOWNLOADING, self.game.state.INSTALLING, self.game.state.UNINSTALLING]
         if self.current_state in dont_act_in_states:
             return
-        elif self.current_state == self.game.__state.INSTALLED or self.current_state == self.game.__state.UPDATABLE:
+        elif self.current_state == self.game.state.INSTALLED or self.current_state == self.game.state.UPDATABLE:
             start_game(self.game, self.parent)
-        elif self.current_state == self.game.__state.INSTALLABLE:
+        elif self.current_state == self.game.state.INSTALLABLE:
             install_thread = threading.Thread(target=self.__install)
             install_thread.start()
-        elif self.current_state == self.game.__state.DOWNLOADABLE:
-            download_thread = threading.Thread(target=self.__download_file)
-            download_thread.start()
+        elif self.current_state == self.game.state.DOWNLOADABLE:
+            self.__download_file(widget)
 
     @Gtk.Template.Callback("on_menu_button_cancel_clicked")
     def on_menu_button_cancel(self, widget):
@@ -852,9 +933,9 @@ class Details(Gtk.Viewport):
         
     @Gtk.Template.Callback("on_menu_button_update_clicked")
     def on_menu_button_update(self, widget):
-        if self.current_state == self.game.__state.UPDATE_INSTALLABLE:
+        if self.current_state == self.game.state.UPDATE_INSTALLABLE:
             self.parent.update(self.game)
-        elif self.current_state == self.game.__state.UPDATABLE or self.current_state == self.game.__state.INSTALLED:
+        elif self.current_state == self.game.state.UPDATABLE or self.current_state == self.game.state.INSTALLED:
             self.parent.download_update(self.game)
 
     def __get_install_dir(self):
@@ -873,26 +954,26 @@ class Details(Gtk.Viewport):
         self.menu_button_cancel.hide()
         self.update_icon.hide()
         # configure button label and available options
-        if (self.current_state == self.game.__state.INSTALLED or self.current_state == self.game.__state.UPDATABLE):
+        if (self.current_state == self.game.state.INSTALLED or self.current_state == self.game.state.UPDATABLE):
             self.button.set_label(_("play"))
             self.menu_button_uninstall.show()
             self.menu_button_open.show()
-        elif (self.current_state == self.game.__state.DOWNLOADABLE):
+        elif (self.current_state == self.game.state.DOWNLOADABLE):
             self.button.set_label(_("download"))
             self.installed_version_label.set_text("")
-        elif (self.current_state == self.game.__state.DOWNLOADING or self.current_state == self.game.__state.UPDATE_DOWNLOADING):
+        elif (self.current_state == self.game.state.DOWNLOADING or self.current_state == self.game.state.UPDATE_DOWNLOADING):
             self.button.set_label(_("downloading.."))
             self.menu_button_cancel.show()
-        elif (self.current_state == self.game.__state.QUEUED):
+        elif (self.current_state == self.game.state.QUEUED):
             self.button.set_label(_("in queue.."))
             self.menu_button_cancel.show()
-        elif (self.current_state == self.game.__state.UPDATE_QUEUED):
+        elif (self.current_state == self.game.state.UPDATE_QUEUED):
             self.menu_button_cancel.show()
-        elif (self.current_state == self.game.__state.INSTALLING):
+        elif (self.current_state == self.game.state.INSTALLING):
             self.button.set_label(_("installing.."))
-        elif (self.current_state == self.game.__state.UNINSTALLING):
+        elif (self.current_state == self.game.state.UNINSTALLING):
             self.button.set_label(_("uninstalling.."))
-        elif (self.current_state == self.game.__state.UPDATING):
+        elif (self.current_state == self.game.state.UPDATING):
             self.button.set_label(_("updating.."))
             self.menu_button_uninstall.show()
             self.menu_button_open.show()
@@ -900,9 +981,9 @@ class Details(Gtk.Viewport):
         if self.game.installed == 1 and self.game.updates is not None and self.game.updates > 0:
             self.update_icon.show()
             # figure out if we should fetch or install the update
-            if (self.current_state == self.game.__state.UPDATABLE or self.current_state == self.game.__state.INSTALLED):
+            if (self.current_state == self.game.state.UPDATABLE or self.current_state == self.game.state.INSTALLED):
                 self.menu_button_update.set_label(_("Update"))
-            elif (self.current_state == self.game.__state.UPDATE_INSTALLABLE):
+            elif (self.current_state == self.game.state.UPDATE_INSTALLABLE):
                 self.menu_button_update.set_label(_("Install Update"))
             else:
                 self.menu_button_update.set_label(_("Update"))
@@ -913,20 +994,20 @@ class Details(Gtk.Viewport):
             self.menu_button_settings.show()
 
     def reload_state(self):
-        dont_act_in_states = [self.game.__state.QUEUED, self.game.__state.DOWNLOADING, self.game.__state.INSTALLING, self.game.__state.UNINSTALLING, self.game.__state.UPDATING, self.game.__state.UPDATE_QUEUED, self.game.__state.UPDATE_DOWNLOADING]
+        dont_act_in_states = [self.game.state.QUEUED, self.game.state.DOWNLOADING, self.game.state.INSTALLING, self.game.state.UNINSTALLING, self.game.state.UPDATING, self.game.state.UPDATE_QUEUED, self.game.state.UPDATE_DOWNLOADING]
         if self.current_state in dont_act_in_states:
             return
         if self.game.install_dir and os.path.exists(self.game.install_dir):
-            self.update_to_state(self.game.__state.INSTALLED)
+            self.update_to_state(self.game.state.INSTALLED)
         elif os.path.exists(self.keep_path):
-            self.update_to_state(self.game.__state.INSTALLABLE)
+            self.update_to_state(self.game.state.INSTALLABLE)
         else:
-            self.update_to_state(self.game.__state.DOWNLOADABLE)
+            self.update_to_state(self.game.state.DOWNLOADABLE)
         self.update_options()
 
     def update_to_state(self, state):
         self.current_state = state
-        if state == self.game.__state.DOWNLOADABLE or state == self.game.__state.INSTALLABLE or state == self.game.__state.UPDATE_INSTALLABLE or state == self.game.__state.INSTALLED or state == self.game.__state.UPDATABLE:
+        if state == self.game.state.DOWNLOADABLE or state == self.game.state.INSTALLABLE or state == self.game.state.UPDATE_INSTALLABLE or state == self.game.state.INSTALLED or state == self.game.state.UPDATABLE:
             self.button.set_sensitive(True)
         else:
             self.button.set_sensitive(False)

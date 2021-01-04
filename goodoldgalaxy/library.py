@@ -109,9 +109,7 @@ class Library():
                         game.installed_version = installed_game.installed_version
                         game.platform = installed_game.platform
                         game.language = installed_game.language
-                        game.sidebar_tile = installed_game.sidebar_tile
-                        game.list_tile = installed_game.list_tile
-                        game.grid_tile = installed_game.grid_tile
+                        game.set_state_listeners = installed_game.get_state_listeners()
                         # also check if we have the most up to date version or not
                         try:
                             resp=gmap[str(game.id)]

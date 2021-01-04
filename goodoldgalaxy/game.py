@@ -12,7 +12,7 @@ from goodoldgalaxy.constants import IETF_CODES_TO_DOWNLOAD_LANGUAGES
 class Game:
     """Class that represents a GOG Game or DLC.
     """
-    __state = Enum('state', 'DOWNLOADABLE INSTALLABLE UPDATABLE QUEUED DOWNLOADING INSTALLING INSTALLED NOTLAUNCHABLE UNINSTALLING UPDATING UPDATE_QUEUED UPDATE_DOWNLOADING UPDATE_INSTALLABLE')
+    state = Enum('state', 'DOWNLOADABLE INSTALLABLE UPDATABLE QUEUED DOWNLOADING INSTALLING INSTALLED NOTLAUNCHABLE UNINSTALLING UPDATING UPDATE_QUEUED UPDATE_DOWNLOADING UPDATE_INSTALLABLE')
     valid_filename_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
     char_limit = 255
     
@@ -53,14 +53,11 @@ class Game:
         self.installed_version: str = None
         self.available_version: str = None
         # State is now private
-        self.__state:Enum = self.__state.INSTALLABLE
+        self.__state:Enum = self.state.INSTALLABLE
         self.cache_dir: str = os.path.join(CACHE_DIR, "game/{}".format(game_id))
         if os.path.exists(self.cache_dir) == False:
             os.makedirs(self.cache_dir)
         self.is_gog_game: int = 0
-        self.sidebar_tile = None
-        self.list_tile = None
-        self.grid_tile = None
         self.safe_name = self.__clean_filename(self.name)
 
         self.dlc_status_list = ["not-installed", "installed", "updatable"]
@@ -87,6 +84,24 @@ class Game:
         
         # registered state listeners
         self.__state_listeners = []
+        
+    def get_state_listeners(self):
+        """Gets the list of state listeners.
+        
+        Returns:
+            list: State listeners
+        """
+        return self.__state_listeners
+    
+    def set_state_listeners(self, listeners: list):
+        if listeners is None:
+            return
+        """Sets the list of state listeners.
+        
+        Args:
+            list: State listeners
+        """
+        self.__state_listeners = listeners
         
     def register_state_listener(self,listener_func):
         """
@@ -118,14 +133,31 @@ class Game:
             state (Enum): State to set
             notify (bool): True if listeners should be notified about the state change, False otherwise
         """
+        # ignore same state
+        if self.__state == state:
+            return
         self.__state = state
+        # handle a special case for uninstalled games
+        if state == self.state.UNINSTALLING or state == self.state.DOWNLOADABLE:
+            self.updates = 0
+            self.installed = 0
+            self.installed_version = None
+            for dlc in self.dlcs:
+                dlc.updates = 0
+                dlc.installed = 0
+                dlc.installed_version = None
+            
         if notify == False:
             return
+        # create a copy of the listeners first, this is to avoid issues with list removals
+        current_listeners = []
         for listener_func in self.__state_listeners:
+            current_listeners.append(listener_func)
+        for listener_func in current_listeners:
             listener_func(self,state)
 
 
-    def state(self):
+    def get_state(self):
         """Gets the game state.
 
         Returns:
@@ -166,7 +198,7 @@ class Game:
         if installed_version is not None:
             self.installed_version = installed_version
         # set game to installed
-        self.set_state(self.__state.INSTALLED)
+        self.set_state(self.state.INSTALLED)
         # make sure platform is in supported platforms
         if platform is not None and platform not in self.supported_platforms:
             self.supported_platforms.append(platform)
@@ -400,7 +432,7 @@ class Game:
         dlc.installed = 1 if self.get_dlc_status(dlc.name, dlc.available_version) == "installed" else 0
         dlc.installed_version = self.get_dlc_installed_version(dlc.name)
         if dlc.installed == 1:
-            dlc.__state = self.__state.INSTALLED
+            dlc.__state = self.state.INSTALLED
             dlc.language = self.language
             dlc.platform = self.platform
             dlc.updates = 1 if dlc.installed_version != dlc.available_version else 0
@@ -409,7 +441,7 @@ class Game:
             dlc.language = language
         # add DLC to supported DLCs for this game
         if dlc.updates == 1:
-            dlc.__state = self.__state.UPDATABLE
+            dlc.__state = self.state.UPDATABLE
         self.dlcs.append(dlc)
 
     def __clean_filename(self, filename, whitelist=valid_filename_chars, replace=' '):

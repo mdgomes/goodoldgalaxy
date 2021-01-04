@@ -137,7 +137,41 @@ class Library(Gtk.Viewport):
             self.tagsbox.pack_start(ck,False,True,10)
         self.genrebox.show_all()
         self.tagsbox.show_all()
-  
+        
+    def find_grid_tile_for_game(self, game: Game) -> GameTile:
+        """Finds the grid tile for a given game.
+        
+        Args:
+            game (Game): Game for which we want the tile
+        Returns:
+            tile: Returns a GameTile or None if not found
+        """
+        if game is None or self.flowbox is None:
+            return None
+        
+        for child in self.flowbox.get_children():
+            if child.get_children()[0].game == game:
+                return child.get_children()[0]
+        
+        return None
+
+    def find_list_tile_for_game(self, game: Game) -> GameRow:
+        """Finds the list tile for a given game.
+        
+        Args:
+            game (Game): Game for which we want the tile
+        Returns:
+            tile (GameRow): Returns a GameRow or None if not found
+        """
+        if game is None:
+            return None
+        
+        for child in self.listbox.get_children():
+            if child.get_children()[0].game == game:
+                return child.get_children()[0]
+        
+        return None
+
     def view_as_list(self):
         self.reset()
         # add it to the viewport
@@ -160,8 +194,8 @@ class Library(Gtk.Viewport):
         self.listbox.show_all()
 
     def __add_gamerow(self, game):
-        game.list_tile = GameRow(self, game, self.api)
-        self.listbox.add(game.list_tile)
+        list_tile = GameRow(self, game, self.api)
+        self.listbox.add(list_tile)
         
     def view_as_grid(self):
         self.reset()
@@ -185,8 +219,8 @@ class Library(Gtk.Viewport):
         self.flowbox.show_all()
 
     def __add_gametile(self, game):
-        game.grid_tile = GameTile(self, game, self.api)
-        self.flowbox.add(game.grid_tile)
+        grid_tile = GameTile(self, game, self.api)
+        self.flowbox.add(grid_tile)
 
     def update_library(self) -> None:
         library_update_thread = threading.Thread(target=self.__update_library)

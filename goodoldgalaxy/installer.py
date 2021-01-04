@@ -178,6 +178,10 @@ def install_game(game, installer, parent_window=None, main_window=None) -> None:
         update_dir = os.path.join(CACHE_DIR, "update")
         if not os.path.exists(keep_dir):
             os.makedirs(keep_dir, mode=0o755)
+        if not os.path.exists(download_dir):
+            os.makedirs(download_dir,mode=0o755)
+        if not os.path.exists(update_dir):
+            os.makedirs(update_dir,mode=0o755)
         try:
             # It's needed for multiple files
             for file in os.listdir(download_dir):
