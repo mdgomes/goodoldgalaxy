@@ -85,6 +85,40 @@ class Game:
         # registered state listeners
         self.__state_listeners = []
         
+    def get_formatted_image_url(self, source:str = None, size:str = None) -> str:
+        """Gets a formatted image based on a given source with a required size.
+        
+        Args:
+            source (str): Source image, i.e. logo_url
+            size (str): Required size, i.e. ggvgt, ggvgt_2x, ggvgm, ggvgm_2x, ggvgl, ggvgl_2x
+        Returns:
+            Url as string for the formatted image.
+        """
+        if source is None:
+            return self.image_url
+        img_url = None
+        if source == "image_url" or source == "image":
+            img_url = self.image_url
+        elif source == "logo_url" or source == "logo":
+            img_url = self.logo_url
+        elif source == "icon_url" or source == "icon":
+            img_url = self.icon_url
+        elif source == "sidebar_icon_url" or source == "sidebar" or source == "sidebar_icon":
+            img_url = self.sidebar_icon_url
+        elif source == "background_url" or source == "background":
+            img_url = self.background_url
+        else:
+            # fall back
+            img_url = self.image_url
+        if size is None:
+            return img_url
+        first_idx = img_url.find('_')
+        extension_idx = img_url.rfind('.')
+        if first_idx < 0:
+            return img_url[0:extension_idx]+'_'+size+img_url[extension_idx:]
+        else:
+            return img_url[0:first_idx]+'_'+size+img_url[extension_idx:]
+        
     def get_state_listeners(self):
         """Gets the list of state listeners.
         

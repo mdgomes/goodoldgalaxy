@@ -829,12 +829,12 @@ class Details(Gtk.Viewport):
     def __load_background_image(self):
         if self.__set_background_image():
             return True
-        if not self.game.background_url or not self.game.id:
+        if not self.game.logo_url or not self.game.id:
             return False
 
         # Download the thumbnail
-        image_url = "https:{}".format(self.game.background_url)
-        img = os.path.join(self.game.cache_dir, "{}_background.jpg".format(self.game.id))
+        image_url = "https:{}".format(self.game.get_formatted_image_url("logo","ggvgm"))
+        img = os.path.join(self.game.cache_dir, "{}_details.jpg".format(self.game.id))
 
         download = Download(image_url, img)
         download.register_finish_function(self.__set_background_image)
@@ -843,18 +843,18 @@ class Details(Gtk.Viewport):
     
     def __set_background_image(self,width:int = None):
         # minimum height 220
-        if width is None:
-            width = self.parent.selection_window.get_allocation().width - 30
-        if (width < 640):
-            width = 640
+        #if width is None:
+        #    width = self.parent.selection_window.get_allocation().width - 30
+        #if (width < 510):
+        #    width = 510
         self.__background_width = width
         if self.background_image is not None:
             self.background_image.clear()
-        img = os.path.join(self.game.cache_dir, "{}_background.jpg".format(self.game.id))
+        img = os.path.join(self.game.cache_dir, "{}_details.jpg".format(self.game.id))
         if os.path.isfile(img) and os.path.exists(img) and os.path.getsize(img) > 0:
             try:
-                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(img,width,-1,True)
-                GLib.idle_add(self.background_image.set_from_pixbuf, pixbuf)
+                #pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(img,width,-1,True)
+                GLib.idle_add(self.background_image.set_from_file, img)
             except Exception as ex:
                 print("Could not format background image. Cause: {}".format(ex))            
             return True
@@ -862,14 +862,14 @@ class Details(Gtk.Viewport):
     
     @Gtk.Template.Callback("on_box_resize")
     def on_box_resize(self,container):
-        self.__set_background_image()
+        #self.__set_background_image()
         return
     
     @Gtk.Template.Callback("on_size_allocate")
     def on_size_allocate(self,widget,dimensions):
-        if self.__background_width is None or self.__background_width == dimensions.width - 8:
-            return
-        self.__set_background_image(dimensions.width - 8)
+        #if self.__background_width is None or self.__background_width == dimensions.width - 8:
+        #    return
+        #self.__set_background_image(dimensions.width - 8)
         return
 
     @Gtk.Template.Callback("on_button_clicked")
