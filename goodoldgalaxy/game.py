@@ -287,6 +287,62 @@ class Game:
     def __strip_string(string):
         return re.sub('[^A-Za-z0-9]+', '', string)
 
+    def update_game_time(self, session_play_time:int = 0, session_play_date:int = None):
+        """Method used to update the game time, i.e. the time the user spent playing the game.
+        
+        This is a two step process, fetch the current information, 
+        calculate the new total time and update the last played date.
+        
+        Args:
+            session_play_time (int): Last play time (i.e. the total time spent playing the game in the last session)
+            last_play_date (datetime): Last date the user played the game
+        """
+        # not installed, nothing to update?
+        if self.installed == 0:
+            return
+        gamestats_path = os.path.join(self.install_dir, "gamestats")
+        total_play_time = session_play_time
+        gamestats = {}
+        if os.path.isfile(gamestats_path):
+            gamestats_file = open(gamestats_path, 'r')
+            try:
+                gamestats = json.load(gamestats_file)
+                if "totalPlayTime" in gamestats:
+                    total_play_time = gamestats["totalPlayTime"];
+                total_play_time = int(total_play_time) + session_play_time
+            except:
+                print("File borked")
+            # close the file
+            gamestats_file.close()
+        gamestats["totalPlayTime"] = total_play_time
+        if session_play_date is not None:
+            gamestats["lastPlaySession"] = session_play_date
+        gamestats_file = open(gamestats_path, 'w')
+        json.dump(gamestats, gamestats_file)
+        # close the file
+        gamestats_file.close()
+
+    def get_last_play_date(self):
+        """
+        Gets the last play session timestamp.
+        
+        Return:
+            Last play session timestamp (or None if there was none)
+        """
+        # not installed, nothing to update?
+        if self.installed == 0:
+            return None
+        gamestats_path = os.path.join(self.install_dir, "gamestats")
+        gamestats = {}
+        last_play_session = None
+        if os.path.isfile(gamestats_path):
+            gamestats_file = open(gamestats_path, 'r')
+            gamestats = json.load(gamestats_file)
+            if "lastPlaySession" in gamestats:
+                last_play_session = gamestats["lastPlaySession"]
+            gamestats_file.close()
+        return last_play_session
+
     def read_installed_version(self):
         if self.installed == 0:
             return

@@ -1,4 +1,4 @@
-
+import time
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib
@@ -32,7 +32,13 @@ class InstalledRow(Gtk.Box):
         # register state listeners
         self.game.register_state_listener(self.__game_state_listener)
         
-        self.last_played_label.set_text(_("Not yet played"))
+        last_played = _("Not yet played")
+        last_play_timestamp = game.get_last_play_date()
+        if last_play_timestamp is not None:
+            
+            last_played = time.strftime("%c", time.gmtime(int(last_play_timestamp)))
+        
+        self.last_played_label.set_text(last_played)
 
         self.load_icon()
 

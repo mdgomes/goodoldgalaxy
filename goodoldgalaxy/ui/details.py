@@ -177,7 +177,8 @@ class Details(Gtk.Viewport):
         if idx > 0:
             self.genres_label.show()
             self.genres_header.show()
-            self.genres_label.set_text(genres)
+            #self.genres_label.set_text(genres)
+            self.genres_label.set_label(genres)
         else:
             self.genres_label.hide()
             self.genres_header.hide()

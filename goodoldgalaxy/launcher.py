@@ -5,10 +5,13 @@ import re
 import json
 import gi
 import glob
+import time
+import datetime
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from goodoldgalaxy.translation import _
 from goodoldgalaxy.config import Config
+from goodoldgalaxy.game import Game
 
 
 def config_game(game):
@@ -145,10 +148,11 @@ def set_fps_display():
     return error_message
 
 
-def run_game_subprocess(game):
+def run_game_subprocess(game:Game):
     # Change the directory to the install dir
     working_dir = os.getcwd()
     os.chdir(game.install_dir)
+    game_start = time.time()
     try:
         process = subprocess.Popen(get_execute_command(game), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         error_message = ""
@@ -156,6 +160,9 @@ def run_game_subprocess(game):
         process = None
         error_message = _("No executable was found in {}").format(game.install_dir)
 
+    total_time = time.time() - game_start;
+    # update the total play time and last played
+    game.update_game_time(int(total_time),int(time.time()))
     # restore the working directory
     os.chdir(working_dir)
     return error_message, process
